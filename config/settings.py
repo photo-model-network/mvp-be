@@ -45,6 +45,7 @@ INSTALLED_APPS = [
 ]
 
 CUSTOM_APPS = [
+    "api.common",
     "api.accounts",
     "api",
 ]
@@ -144,6 +145,9 @@ MEDIA_URL = "/uploads/"
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+AUTH_USER_MODEL = "accounts.User"
 
 # REST Simple JWT 설정
 
