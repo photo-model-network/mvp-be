@@ -47,6 +47,7 @@ INSTALLED_APPS = [
 CUSTOM_APPS = [
     "api.common",
     "api.accounts",
+    "api.packages",
     "api",
 ]
 
