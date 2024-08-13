@@ -24,10 +24,11 @@ class CustomUserAdmin(UserAdmin):
             "아티스트 필드",
             {
                 "fields": (
-                    "artist_name",
-                    "manager_name",
-                    "manager_email",
-                    "manager_phone_number",
+                    "real_name",
+                    "phone_number",
+                    "is_authenticated",
+                    "business_license_number",
+                    "is_business",
                 ),
             },
         ),
@@ -53,4 +54,4 @@ class CustomUserAdmin(UserAdmin):
         ),
     )
 
-    list_display = ["username", "is_approved", "type", "manager_name"]
+    list_display = ["username", "is_approved", "type", "real_name"]
