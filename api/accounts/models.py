@@ -27,14 +27,17 @@ class User(AbstractUser):
     # 아티스트 승인 여부
     is_approved = models.BooleanField(default=False)
 
-    # 아티스트(기업)명
-    artist_name = models.CharField(max_length=255, blank=True, null=True)
-    # 관리자 명
-    manager_name = models.CharField(max_length=255, blank=True, null=True)
-    # 관리자 이메일
-    manager_email = models.EmailField(blank=True, null=True)
-    # 관리자 휴대폰 번호
-    manager_phone_number = models.CharField(max_length=20, blank=True, null=True)
+    # 실명(기업명)
+    real_name = models.CharField(max_length=255, blank=True, null=True)
+    # 본인 휴대폰 번호
+    phone_number = models.CharField(max_length=20, blank=True, null=True)
+    # 본인 인증 여부
+    is_authenticated = models.BooleanField(default=False)
+
+    # 사업자 등록 번호
+    business_license_number = models.CharField(max_length=30, blank=True, null=True)
+    # 사업자 진위 여부
+    is_business = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         # 아바타가 없을 경우 기본 이미지 저장
