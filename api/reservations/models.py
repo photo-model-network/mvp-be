@@ -13,7 +13,7 @@ class Reservation(CommonModel):
         COMPLETE = ("결제 완료", "Complete")
     id = ShortUUIDField(max_length=128, primary_key=True, editable=False)
     package = models.ForeignKey(Package, on_delete=models.CASCADE, related_name="reservations")
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reservations")
+    customer = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reservations")
     status = models.CharField(max_length=15, default=ReservationStatus.PENDING, choices=ReservationStatus.choices)
     package_name = models.CharField(max_length=150, default="")
     package_price = models.PositiveIntegerField(default=0)
