@@ -7,12 +7,12 @@ from api.accounts.models import User
 
 class Reservation(CommonModel):
     class ReservationStatus(models.TextChoices):
-        PENDING = ("대기중", "Pending")
-        CONFIRMED = ("확정", "Confirmed")
-        CANCELED = ("취소", "Canceled")
-        OPERATING = ("운행중", "Operating")
-        DONE = ("서비스 완료", "Done")
-        COMPLETE = ("결제 완료", "Complete")
+        PENDING = ("대기중", "대기중")
+        CONFIRMED = ("예약확정", "예약확정")
+        CANCELED = ("예약취소", "예약취소")
+        OPERATING = ("작업중", "작업중")
+        DONE = ("작업완료", "작업완료")
+        COMPLETE = ("구매확정", "구매확정")
 
     id = ShortUUIDField(max_length=128, primary_key=True, editable=False)
     package = models.ForeignKey(
@@ -42,7 +42,7 @@ class ReservationOption(CommonModel):
 
 class ReservationTimeSlot(CommonModel):
     id = ShortUUIDField(max_length=128, primary_key=True, editable=False)
-    reservation = models.ForeignKey("Reservation", on_delete=models.CASCADE)
+    reservation = models.ForeignKey(Reservation, on_delete=models.CASCADE)
     # 예약 가능한 날짜
     date = models.DateField()
     # 예약 가능 시작시간

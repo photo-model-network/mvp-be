@@ -5,22 +5,6 @@ from api.common.models import CommonModel
 from api.accounts.models import User
 
 
-# class PackageCategory(models.Model):
-#     """촬영 패키지 카테고리"""
-
-#     # 카테고리 명
-#     name = models.CharField(max_length=50)
-
-
-# class PackageTag(CommonModel):
-#     """촬영 패키지 검색용 태그"""
-
-#     name = models.CharField(max_length=100)
-
-#     def __str__(self):
-#         return self.name
-
-
 class PackagePicture(CommonModel):
     """촬영 패키지 소개 이미지 (여러장)"""
 
@@ -123,12 +107,7 @@ class Package(CommonModel):
     summary = models.TextField()
     # 패키지 내용 (에디터로 작성한 글과 이미지)
     html_content = models.TextField()
-    # 검색용 태그; 역참조 시 tag.packages.all
-    # tags = models.ManyToManyField(
-    #     PackageTag, related_name="packages", blank=True, null=True
-    # )
     # 검색용 태그
     tags = TaggableManager()
-
     # 기본 정책 및 사용자 추가 정책
     policy = models.ForeignKey(PackagePolicy, on_delete=models.CASCADE)
