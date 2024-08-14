@@ -4,7 +4,6 @@ from .models import (
     PackageProvider,
     PackagePolicy,
     PackageOption,
-    # PackageTag,
     PackagePicture,
 )
 
@@ -27,11 +26,6 @@ class PackagePolicyAdmin(admin.ModelAdmin):
 @admin.register(PackageOption)
 class PackageOptionAdmin(admin.ModelAdmin):
     pass
-
-
-# @admin.register(PackageTag)
-# class PackageTagAdmin(admin.ModelAdmin):
-#     pass
 
 
 @admin.register(PackagePicture)
