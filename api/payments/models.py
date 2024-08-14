@@ -1,6 +1,7 @@
 from django.db import models
 from api.common.models import CommonModel
 from shortuuid.django_fields import ShortUUIDField
+from api.reservations.models import Reservation
 
 
 class Payment(CommonModel):
@@ -20,7 +21,7 @@ class Payment(CommonModel):
         CANCELED = ("결제취소", "결제취소")
 
     id = ShortUUIDField(max_length=128, primary_key=True, editable=False)
-    reservation = models.ForeignKey("Reservation", on_delete=models.CASCADE)
+    reservation = models.ForeignKey(Reservation, on_delete=models.CASCADE)
     # 결제 금액
     amount = models.PositiveIntegerField()
     # 결제일
