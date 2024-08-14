@@ -3,24 +3,22 @@ from api.common.models import CommonModel
 from shortuuid.django_fields import ShortUUIDField
 
 class Payment(CommonModel):
-    STATUS_CHOICES = [
-        ('confirmed', 'Confirmed'),
-        ('cancelled', 'Cancelled'),
-        ('operating', 'Operating'),
-        ('done', 'Done'),
-        ('complete', 'Complete'),
-    ]
+
+    class StatusChoices(models.TextChoices):
+        CONFIRMED = ("confirmed", "Confirmed")
+        CANCELLED = ("cancelled", "Cancelled")
+        OPERATING = ("operating", "Operating")
+        DONE = ("done", "Done")
+        COMPLETE = ("complete", "Complete")
+
     id = ShortUUIDField(max_length=128, primary_key=True, editable=False)
     reservation = models.ForeignKey('Reservation', on_delete=models.CASCADE)
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    # 결제 금액
+    amount = models.PositiveIntegerField()
+    # 결제일
     payment_date = models.DateTimeField()
-    status = models.CharField(max_length=20, cboices=STATUS_CHOICES)
+    # 결제상태 (5가지로 구분)
+    status = models.CharField(max_length=20, choices=StatusChoices)
+    # 결제 방법 
     payment_method = models.CharField(max_length=20)
 
-class ReservationTimeSlot(CommonModel):
-    id = ShortUUIDField(max_length=128, primary_key=True, editable=False)
-    reservation = models.ForeignKey('Reservation', on_delete=models.CASCADE)
-    date = models.DateField()
-    start_time = models.TimeField()
-    end_time = models.TimeField()
-    is_available = models.BooleanField(default=True)
