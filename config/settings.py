@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "rest_framework",
     "drf_yasg",
+    "taggit",
 ]
 
 CUSTOM_APPS = [
@@ -49,6 +50,7 @@ CUSTOM_APPS = [
     "api.accounts",
     "api.payments",
     "api.reservations",
+    "api.packages",
     "api",
 ]
 
