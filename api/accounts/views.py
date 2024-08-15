@@ -1,3 +1,14 @@
 from django.shortcuts import render
+from rest_framework.views import APIView
 
-# Create your views here.
+
+class GoogleView(APIView):
+    pass
+
+
+class KakaoView(APIView):
+    pass
+
+
+class NaverView(APIView):
+    pass

@@ -51,6 +51,7 @@ CUSTOM_APPS = [
     "api.payments",
     "api.reservations",
     "api.packages",
+    "api.timeslots",
     "api",
 ]
 

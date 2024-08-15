@@ -5,6 +5,8 @@ from .models import (
     PackagePolicy,
     PackageOption,
     PackagePicture,
+    PackageTag,
+    PackageTaggedItem,
 )
 
 
@@ -31,3 +33,18 @@ class PackageOptionAdmin(admin.ModelAdmin):
 @admin.register(PackagePicture)
 class PackagePictureAdmin(admin.ModelAdmin):
     pass
+
+
+@admin.register(PackageTag)
+class PackageTagAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(PackageTaggedItem)
+class PackageTaggedItemAdmin(admin.ModelAdmin):
+    pass
+
+
+from taggit.models import Tag
+
+admin.site.unregister(Tag)
