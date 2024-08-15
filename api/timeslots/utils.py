@@ -4,8 +4,8 @@ from .models import UnavailableTimeSlot
 
 def get_available_times(package, check_date):
     """특정 날짜에 예약 가능한 시간대를 동적으로 계산하는 함수"""
-    start_time = time(10, 0)  # 오전 8시
-    end_time = time(20, 0)  # 오후 7시 30분 (오후 8시)
+    start_time = time(9, 0)  # 오전 9시
+    end_time = time(22, 0)  # 오후 9시 (오후 10시)
     available_times = []
 
     current_time = start_time
@@ -20,7 +20,7 @@ def get_available_times(package, check_date):
             available_times.append(current_time)
 
         current_time = (
-            datetime.combine(datetime.today(), current_time) + timedelta(minutes=30)
+            datetime.combine(datetime.today(), current_time) + timedelta(hours=1)
         ).time()
 
     return available_times

@@ -34,9 +34,10 @@ class Reservation(CommonModel):
     # 예약 당시 패키지 제목
     package_title = models.CharField(max_length=150, blank=True, null=True)
 
-    ######'
-    res_date = models.DateField()
-    res_time = models.TimeField()
+    # 촬영 날짜
+    filming_date = models.DateField()
+    # 촬영 시작 시간
+    filming_start_time = models.TimeField()
 
     def save(self, *args, **kwargs):
         if not self.package_title:

@@ -42,11 +42,11 @@ class TimeSlotTestCase(TestCase):
         # 예약 불가 시간 설정
         UnavailableTimeSlot.objects.create(
             package=self.package,
-            date=date(2023, 8, 14),
-            start_time=time(15, 0),
-            end_time=time(17, 12),
+            date=date(2023, 8, 15),
+            start_time=time(6, 0),
+            end_time=time(18, 0),
         )
 
     def test_time_available(self):
         # 예약 가능한 시간 조회
-        print(get_available_times(self.package, date(2023, 8, 14)))
+        print(get_available_times(self.package, date(2023, 8, 15)))

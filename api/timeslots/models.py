@@ -3,7 +3,7 @@ from api.packages.models import Package
 
 
 class UnavailableTimeSlot(models.Model):
-    """패키지의 예약 불가능한 시간대를 정의하는 모델"""
+    """패키지의 촬영 불가능한 시간대를 정의하는 모델"""
 
     package = models.ForeignKey(
         Package, on_delete=models.CASCADE, related_name="unavaliable_timeslots"
