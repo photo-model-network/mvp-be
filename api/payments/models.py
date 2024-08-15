@@ -32,3 +32,7 @@ class Payment(CommonModel):
     )
     # 결제 방법
     payment_method = models.CharField(max_length=20)
+
+    class Meta:
+        verbose_name = "결제"
+        verbose_name_plural = "결제"
