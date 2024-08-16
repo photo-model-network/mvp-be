@@ -148,3 +148,4 @@ class Migration(migrations.Migration):
             field=taggit.managers.TaggableManager(help_text='A comma-separated list of tags.', through='packages.PackageTaggedItem', to='packages.PackageTag', verbose_name='Tags'),
         ),
     ]
+
