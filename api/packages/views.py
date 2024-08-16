@@ -9,17 +9,13 @@ from rest_framework.views import APIView
 class PackageCreateView(generics.CreateAPIView):
     
     permission_classes = [IsAuthenticated]
+    # permission_classes = [AllowAny]
 
     """
     새 package 생성
     """
     serializer_class = PackageCUDSerializer
 
-    def package_create(self, request):
-        serializer = PackageCUDSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 class PackageListView(generics.ListAPIView):
     
