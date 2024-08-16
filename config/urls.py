@@ -47,7 +47,7 @@ urlpatterns = [
 
 api_urlpatterns = [
     path("api/", include("api.accounts.urls")),
-    path("", include("api.packages.urls")),
+    path("api/", include("api.packages.urls")),
 ]
 
 urlpatterns += api_urlpatterns
