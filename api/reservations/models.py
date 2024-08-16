@@ -1,3 +1,4 @@
+import datetime
 from django.db import models
 from shortuuid.django_fields import ShortUUIDField
 from api.common.models import CommonModel
@@ -26,28 +27,46 @@ class Reservation(CommonModel):
         default=ReservationStatus.PENDING,
         choices=ReservationStatus.choices,
     )
-    package_name = models.CharField(max_length=150, default="")
-    package_price = models.PositiveIntegerField(default=0)
-    reservation_date = models.DateField(null=True, blank=True)
+
+    # 요청사항
+    request = models.TextField(blank=True, null=True)
+
+    # 예약 당시 패키지 제목
+    package_title = models.CharField(max_length=150, blank=True, null=True)
+
+    # 촬영 날짜
+    filming_date = models.DateField()
+    # 촬영 시작 시간
+    filming_start_time = models.TimeField()
+
+    def save(self, *args, **kwargs):
+        if not self.package_title:
+            self.package_title = self.package.title
+
+        super().save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = "예약"
+        verbose_name_plural = "예약"
 
 
 class ReservationOption(CommonModel):
+    """예약 당시 옵션 정보"""
+
     reservation = models.ForeignKey(
         Reservation, on_delete=models.CASCADE, related_name="options"
     )
+    # 예약 당시 옵션명
     name = models.CharField(max_length=200)
+    # 예약 당시 구성 설명
     description = models.TextField()
+    # 예약 당시 가격
     price = models.PositiveIntegerField(default=0)
+    # 예약 당시 배송 여부
+    is_delivered = models.BooleanField(default=False)
+    # 예약 당시 배송비
+    delivery_fee = models.PositiveIntegerField(default=0)
 
-
-class ReservationTimeSlot(CommonModel):
-    id = ShortUUIDField(max_length=128, primary_key=True, editable=False)
-    reservation = models.ForeignKey(Reservation, on_delete=models.CASCADE)
-    # 예약 가능한 날짜
-    date = models.DateField()
-    # 예약 가능 시작시간
-    start_time = models.TimeField()
-    # 예약 가능 종료시간
-    end_time = models.TimeField()
-    # 예약 가능 여부
-    is_available = models.BooleanField(default=True)
+    class Meta:
+        verbose_name = "예약 당시 옵션"
+        verbose_name_plural = "예약 당시 옵션"

@@ -1,5 +1,6 @@
 from django.db import models
 from shortuuid.django_fields import ShortUUIDField
+from taggit.models import GenericTaggedItemBase, TagBase
 from taggit.managers import TaggableManager
 from api.common.models import CommonModel
 from api.accounts.models import User
@@ -10,10 +11,17 @@ class PackagePicture(CommonModel):
     package = models.ForeignKey("Package", on_delete=models.CASCADE)
     image = models.URLField()
 
+    class Meta:
+        verbose_name = "패키지 소개 이미지"
+        verbose_name_plural = "패키지 소개 이미지"
+
 
 class PackagePolicy(CommonModel):
     """촬영 패키지 환불 및 A/S 정책"""
-    pass
+
+    class Meta:
+        verbose_name = "패키지 정책"
+        verbose_name_plural = "패키지 정책"
 
 
 class PackageOption(CommonModel):
@@ -29,6 +37,10 @@ class PackageOption(CommonModel):
     is_delivered = models.BooleanField(default=False)
     # 배송비
     delivery_fee = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        verbose_name = "패키지 옵션"
+        verbose_name_plural = "패키지 옵션"
 
 
 class PackageProvider(CommonModel):
@@ -49,6 +61,43 @@ class PackageProvider(CommonModel):
     twitter_url = models.URLField(blank=True, null=True)
     # 인스타그램 URL
     instagram_url = models.URLField(blank=True, null=True)
+
+    class Meta:
+        verbose_name = "패키지 제공자 정보"
+        verbose_name_plural = "패키지 제공자 정보"
+
+
+class PackageReview(CommonModel):
+    package = models.ForeignKey("Package", on_delete=models.CASCADE)
+    customer = models.ForeignKey(User, on_delete=models.CASCADE)
+    comment = models.TextField()
+
+    class Meta:
+        verbose_name = "패키지 리뷰"
+        verbose_name_plural = "패키지 리뷰"
+
+
+class PackageTag(TagBase):
+
+    class Meta:
+        verbose_name = "패키지 검색용 태그"
+        verbose_name_plural = "패키지 검색용 태그"
+
+
+class PackageTaggedItem(GenericTaggedItemBase):
+    tag = models.ForeignKey(
+        PackageTag,
+        related_name="%(app_label)s_%(class)s_items",
+        on_delete=models.CASCADE,
+    )
+    object_id = ShortUUIDField()
+
+    def __str__(self):
+        return f"{self.object_id} : [{self.tag}]"
+
+    class Meta:
+        verbose_name = "패키지 + 태그"
+        verbose_name_plural = "패키지 + 태그"
 
 
 class Package(CommonModel):
@@ -104,6 +153,13 @@ class Package(CommonModel):
     # 패키지 내용 (에디터로 작성한 글과 이미지)
     html_content = models.TextField()
     # 검색용 태그
-    # tags = TaggableManager()
+    tags = TaggableManager(through=PackageTaggedItem)
     # 기본 정책 및 사용자 추가 정책
     policy = models.ForeignKey(PackagePolicy, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.title} : {self.provider}"
+
+    class Meta:
+        verbose_name = "패키지"
+        verbose_name_plural = "패키지"

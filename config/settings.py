@@ -16,6 +16,7 @@ from decouple import config
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+print(f"디버그 모드: {config('DEBUG')}")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -51,6 +52,7 @@ CUSTOM_APPS = [
     "api.payments",
     "api.reservations",
     "api.packages",
+    "api.timeslots",
     "api",
 ]
 
@@ -153,6 +155,14 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 AUTH_USER_MODEL = "accounts.User"
 
+# 소셜 연동 설정
+NAVER_CLIENT = config("NAVER_CLIENT")
+NAVER_SECRET = config("NAVER_SECRET")
+
+GOOGLE_CLIENT = config("GOOGLE_CLIENT")
+GOOGLE_SECRET = config("GOOGLE_SECRET")
+SOCIAL_CALLBACK_URI = config("SOCIAL_CALLBACK_URI")
+
 # REST Simple JWT 설정
 
 REST_FRAMEWORK = {
@@ -169,4 +179,31 @@ from datetime import timedelta
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+}
+
+# 로거 설정
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "level": (
+                "DEBUG" if DEBUG else "WARNING"
+            ),  # DEBUG 모드일 때는 DEBUG 레벨, 아닐 때는 WARNING 레벨
+            "class": "logging.StreamHandler",
+        },
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": "WARNING",
+            "propagate": True,
+        },
+        # 애플리케이션별 로거 설정
+        "api.accounts": {
+            "handlers": ["console"],
+            "level": "DEBUG" if DEBUG else "WARNING",
+            "propagate": False,
+        },
+    },
 }
