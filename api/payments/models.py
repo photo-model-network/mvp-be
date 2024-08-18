@@ -1,10 +1,9 @@
 from django.db import models
 from api.common.models import CommonModel
 from shortuuid.django_fields import ShortUUIDField
-from api.reservations.models import Reservation
 
 
-class Payment(CommonModel):
+class AbstractPayment(CommonModel):
 
     class StatusChoices(models.TextChoices):
         # 1 결제가 이루어졌지만 아직 승인되지 않은 상태
@@ -20,19 +19,16 @@ class Payment(CommonModel):
         # 6 결제가 취소된 상태
         CANCELED = ("결제취소", "결제취소")
 
-    id = ShortUUIDField(max_length=128, primary_key=True, editable=False)
-    reservation = models.ForeignKey(Reservation, on_delete=models.CASCADE)
+    # 고유 결제 ID
+    payment_id = models.CharField(max_length=255, blank=True, null=True)
     # 결제 금액
-    amount = models.PositiveIntegerField()
+    payment_amount = models.PositiveIntegerField(default=0)
     # 결제일
-    payment_date = models.DateTimeField()
+    payment_date = models.DateTimeField(blank=True, null=True)
     # 결제상태 (6가지)
-    status = models.CharField(
+    payment_status = models.CharField(
         max_length=20, choices=StatusChoices.choices, default=StatusChoices.PENDING
     )
-    # 결제 방법
-    payment_method = models.CharField(max_length=20)
 
     class Meta:
-        verbose_name = "결제"
-        verbose_name_plural = "결제"
+        abstract = True
