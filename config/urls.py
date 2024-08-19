@@ -15,11 +15,14 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
+from datetime import datetime
+from django.conf import settings
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
+
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -33,7 +36,6 @@ schema_view = get_schema_view(
 )
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
     path(
         "swagger<format>/", schema_view.without_ui(cache_timeout=0), name="schema-json"
     ),
@@ -45,9 +47,14 @@ urlpatterns = [
     path("redoc/", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"),
 ]
 
+
+today_datetime = datetime.now(settings.KST).date()
+
 api_urlpatterns = [
+    path(f"admin/{today_datetime}/", admin.site.urls),
     path("api/", include("api.accounts.urls")),
     path("api/", include("api.packages.urls")),
+    path("api/", include("api.reservations.urls")),
 ]
 
 urlpatterns += api_urlpatterns

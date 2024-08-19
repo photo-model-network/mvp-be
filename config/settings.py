@@ -12,11 +12,10 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 from decouple import config
+from pytz import timezone
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-print(f"디버그 모드: {config('DEBUG')}")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -133,6 +132,7 @@ USE_I18N = True
 
 USE_TZ = True
 
+KST = timezone(TIME_ZONE)
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
@@ -156,12 +156,14 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = "accounts.User"
 
 # 소셜 연동 설정
-NAVER_CLIENT = config("NAVER_CLIENT")
-NAVER_SECRET = config("NAVER_SECRET")
+NAVER_CLIENT = config("NAVER_CLIENT", cast=str)
+NAVER_SECRET = config("NAVER_SECRET", cast=str)
 
-GOOGLE_CLIENT = config("GOOGLE_CLIENT")
-GOOGLE_SECRET = config("GOOGLE_SECRET")
-SOCIAL_CALLBACK_URI = config("SOCIAL_CALLBACK_URI")
+GOOGLE_CLIENT = config("GOOGLE_CLIENT", cast=str)
+GOOGLE_SECRET = config("GOOGLE_SECRET", cast=str)
+SOCIAL_CALLBACK_URI = config("SOCIAL_CALLBACK_URI", cast=str)
+
+PORTONE_SECRET = config("PORTONE_SECRET", cast=str)
 
 # REST Simple JWT 설정
 
@@ -185,22 +187,21 @@ SIMPLE_JWT = {
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s (%(filename)s:%(lineno)d)"
+        },
+    },
     "handlers": {
         "console": {
-            "level": (
-                "DEBUG" if DEBUG else "WARNING"
-            ),  # DEBUG 모드일 때는 DEBUG 레벨, 아닐 때는 WARNING 레벨
+            "level": "DEBUG" if DEBUG else "WARNING",
             "class": "logging.StreamHandler",
+            "formatter": "verbose",  # 로깅 포맷터 설정
         },
     },
     "loggers": {
-        "django": {
-            "handlers": ["console"],
-            "level": "WARNING",
-            "propagate": True,
-        },
-        # 애플리케이션별 로거 설정
-        "api.accounts": {
+        # api 아래의 모든 앱에 적용
+        "api": {
             "handlers": ["console"],
             "level": "DEBUG" if DEBUG else "WARNING",
             "propagate": False,
