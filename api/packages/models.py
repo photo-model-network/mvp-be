@@ -33,12 +33,20 @@ class PackageOption(CommonModel):
     name = models.CharField(max_length=200)
     # 옵션 구성 설명
     description = models.TextField()
+    # 소요시간 (분)
+    duration_time = models.PositiveIntegerField(default=0)
     # 금액
     price = models.PositiveIntegerField(default=0)
+    # 인원 추가시 추가요금 (1인당 금액)
+    additional_person_price = models.PositiveIntegerField(default=0)
+
     # 배송 여부
-    is_delivered = models.BooleanField(default=False)
+    # is_delivered = models.BooleanField(default=False)
     # 배송비
-    delivery_fee = models.PositiveIntegerField(default=0)
+    # delivery_fee = models.PositiveIntegerField(default=0)
+
+    def __str__(self):
+        return self.name
 
     class Meta:
         verbose_name = "패키지 옵션"
@@ -134,7 +142,7 @@ class Package(CommonModel):
         GYEONGNAM = ("경남", "경남")
         JEJU = ("제주", "제주")
 
-    id = ShortUUIDField(max_length=128, primary_key=True, editable=False)
+    id = ShortUUIDField(max_length=22, primary_key=True, editable=False)
     # 패키지 카테고리
     category = models.CharField(
         max_length=20, choices=CategoryChoices.choices, default=CategoryChoices.PROFILE

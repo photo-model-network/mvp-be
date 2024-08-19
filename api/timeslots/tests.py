@@ -1,5 +1,5 @@
 from django.test import TestCase
-from datetime import time, date
+from datetime import time, date, datetime
 from api.packages.models import Package, PackageProvider, PackagePolicy
 from api.accounts.models import User
 from .models import UnavailableTimeSlot
@@ -39,14 +39,14 @@ class TimeSlotTestCase(TestCase):
             policy=self.policy,
         )
 
-        # 예약 불가 시간 설정
+        # 촬영 불가 시간 설정
         UnavailableTimeSlot.objects.create(
             package=self.package,
-            date=date(2023, 8, 15),
-            start_time=time(6, 0),
-            end_time=time(18, 0),
+            # date=date(2024, 8, 15),
+            start_datetime=datetime(2024, 8, 15, 18, 0),
+            end_datetime=datetime(2024, 8, 16, 0, 15),
         )
 
     def test_time_available(self):
         # 예약 가능한 시간 조회
-        print(get_available_times(self.package, date(2023, 8, 15)))
+        print(get_available_times(self.package, date(2024, 8, 15)))
