@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 class RequestReservationView(APIView):
+    """구매자가 예약 신청"""
 
     # permission_classes = [IsAuthenticated]
 
@@ -55,54 +56,6 @@ class RequestReservationView(APIView):
 
             logger.debug(f"촬영 시작 시간: {start_datetime}")
             logger.debug(f"촬영 종료 시간: {end_datetime}")
-
-            # try:
-
-            #     check_timeslot = UnavailableTimeSlot.objects.filter(
-            #         package=package,
-            #         start_datetime__lt=end_datetime,
-            #         end_datetime__gt=start_datetime,
-            #     ).exists()
-
-            #     if check_timeslot:
-            #         return Response(
-            #             {"error": "해당 시간대는 예약 불가능한 시간대입니다."},
-            #             status=status.HTTP_400_BAD_REQUEST,
-            #         )
-
-            #     reservation = Reservation.objects.create(
-            #         package=package,
-            #         customer=customer,
-            #         filming_date=filming_date,
-            #         filming_start_time=filming_start_time,
-            #     )
-
-            #     UnavailableTimeSlot.objects.create(
-            #         package=reservation.package,
-            #         start_datetime=start_datetime,
-            #         end_datetime=end_datetime,
-            #     )
-
-            # except IntegrityError as e:
-            #     return Response(
-            #         {"error": "해당 시간대는 이미 예약이 불가능합니다."},
-            #         status=status.HTTP_400_BAD_REQUEST,
-            #     )
-
-            # ReservationOption.objects.create(
-            #     reservation=reservation,
-            #     name=selected_option.name,
-            #     description=selected_option.description,
-            #     duration_time=selected_option.duration_time,
-            #     price=selected_option.price,
-            #     additional_person_price=selected_option.additional_person_price,
-            # )
-
-            # return Response(
-            #     {"message": "예약 신청이 완료되었습니다."}, status=status.HTTP_200_OK
-            # )
-
-            # ---
 
             # 예약 가능한 시간대인지 확인
             unavailable_timeslots = UnavailableTimeSlot.objects.filter(
@@ -167,7 +120,6 @@ class RequestReservationView(APIView):
                     {"message": "예약 신청이 완료되었습니다."},
                     status=status.HTTP_200_OK,
                 )
-            # ---
 
         except Exception as e:
             return Response(
