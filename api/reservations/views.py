@@ -2,6 +2,7 @@ import pytz
 import requests
 from django.conf import settings
 from django.db import IntegrityError
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.views import APIView
@@ -19,6 +20,10 @@ logger = logging.getLogger(__name__)
 
 
 class RequestReservationView(APIView):
+    """구매자가 예약 신청"""
+
+    # permission_classes = [IsAuthenticated]
+
     def post(self, request):
 
         package_id = request.data.get("packageId")
@@ -26,7 +31,6 @@ class RequestReservationView(APIView):
 
         filming_date = request.data.get("filmingDate")
         filming_start_time = request.data.get("filmingStartTime")
-
         selected_option_id = request.data.get("selectedOption")
 
         try:
@@ -53,51 +57,69 @@ class RequestReservationView(APIView):
             logger.debug(f"촬영 시작 시간: {start_datetime}")
             logger.debug(f"촬영 종료 시간: {end_datetime}")
 
-            try:
+            # 예약 가능한 시간대인지 확인
+            unavailable_timeslots = UnavailableTimeSlot.objects.filter(
+                package=package,
+                start_datetime__lt=end_datetime,
+                end_datetime__gt=start_datetime,
+            )
+            if unavailable_timeslots.exists():
+                available_options = PackageOption.objects.filter(
+                    package=package
+                ).exclude(id=selected_option_id)
+                valid_options = [
+                    option
+                    for option in available_options
+                    if not unavailable_timeslots.filter(
+                        start_datetime__lt=start_datetime
+                        + timedelta(minutes=option.duration_time),
+                        end_datetime__gt=start_datetime,
+                    ).exists()
+                ]
 
-                check_timeslot = UnavailableTimeSlot.objects.filter(
-                    package=package,
-                    start_datetime__lt=end_datetime,
-                    end_datetime__gt=start_datetime,
-                ).exists()
-
-                if check_timeslot:
+                if valid_options:
+                    options_info = ", ".join(
+                        [
+                            f"{option.name} (소요 시간: {option.duration_time}분)"
+                            for option in valid_options
+                        ]
+                    )
                     return Response(
-                        {"error": "해당 시간대는 예약 불가능한 시간대입니다."},
+                        {
+                            "error": "해당 시간대는 예약 불가능한 시간대입니다.",
+                            "availableOptions": options_info,
+                        },
                         status=status.HTTP_400_BAD_REQUEST,
                     )
-
+                else:
+                    return Response(
+                        {"error": "해당 시간대에 가능한 옵션이 없습니다."},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+            else:
                 reservation = Reservation.objects.create(
                     package=package,
                     customer=customer,
                     filming_date=filming_date,
                     filming_start_time=filming_start_time,
                 )
-
+                ReservationOption.objects.create(
+                    reservation=reservation,
+                    name=selected_option.name,
+                    description=selected_option.description,
+                    duration_time=selected_option.duration_time,
+                    price=selected_option.price,
+                    additional_person_price=selected_option.additional_person_price,
+                )
                 UnavailableTimeSlot.objects.create(
                     package=reservation.package,
                     start_datetime=start_datetime,
                     end_datetime=end_datetime,
                 )
-
-            except IntegrityError as e:
                 return Response(
-                    {"error": "해당 시간대는 이미 예약이 불가능합니다."},
-                    status=status.HTTP_400_BAD_REQUEST,
+                    {"message": "예약 신청이 완료되었습니다."},
+                    status=status.HTTP_200_OK,
                 )
-
-            ReservationOption.objects.create(
-                reservation=reservation,
-                name=selected_option.name,
-                description=selected_option.description,
-                duration_time=selected_option.duration_time,
-                price=selected_option.price,
-                additional_person_price=selected_option.additional_person_price,
-            )
-
-            return Response(
-                {"message": "예약 신청이 완료되었습니다."}, status=status.HTTP_200_OK
-            )
 
         except Exception as e:
             return Response(
