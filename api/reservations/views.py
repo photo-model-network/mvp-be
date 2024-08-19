@@ -30,7 +30,6 @@ class RequestReservationView(APIView):
 
         filming_date = request.data.get("filmingDate")
         filming_start_time = request.data.get("filmingStartTime")
-
         selected_option_id = request.data.get("selectedOption")
 
         try:
@@ -106,20 +105,19 @@ class RequestReservationView(APIView):
             # ---
 
             # 예약 가능한 시간대인지 확인
-            if UnavailableTimeSlot.objects.filter(
+            unavailable_timeslots = UnavailableTimeSlot.objects.filter(
                 package=package,
                 start_datetime__lt=end_datetime,
                 end_datetime__gt=start_datetime,
-            ).exists():
-                # 예약 불가능할 경우, 가능한 옵션 찾기
+            )
+            if unavailable_timeslots.exists():
                 available_options = PackageOption.objects.filter(
                     package=package
                 ).exclude(id=selected_option_id)
                 valid_options = [
                     opt
                     for opt in available_options
-                    if not UnavailableTimeSlot.objects.filter(
-                        package=package,
+                    if not unavailable_timeslots.filter(
                         start_datetime__lt=start_datetime
                         + timedelta(minutes=opt.duration_time),
                         end_datetime__gt=start_datetime,
@@ -146,14 +144,12 @@ class RequestReservationView(APIView):
                         status=status.HTTP_400_BAD_REQUEST,
                     )
             else:
-
                 reservation = Reservation.objects.create(
                     package=package,
                     customer=customer,
                     filming_date=filming_date,
                     filming_start_time=filming_start_time,
                 )
-
                 ReservationOption.objects.create(
                     reservation=reservation,
                     name=selected_option.name,
@@ -162,7 +158,6 @@ class RequestReservationView(APIView):
                     price=selected_option.price,
                     additional_person_price=selected_option.additional_person_price,
                 )
-
                 UnavailableTimeSlot.objects.create(
                     package=reservation.package,
                     start_datetime=start_datetime,
