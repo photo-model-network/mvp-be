@@ -1,7 +1,7 @@
 # Created by https://www.toptal.com/developers/gitignore/api/django,python,windows,linux,macos
 # Edit at https://www.toptal.com/developers/gitignore?templates=django,python,windows,linux,macos
 .env
-/migrations
+**/migrations/
 /staticfiles
 
 ### Django ###
