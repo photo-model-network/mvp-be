@@ -115,11 +115,11 @@ class RequestReservationView(APIView):
                     package=package
                 ).exclude(id=selected_option_id)
                 valid_options = [
-                    opt
-                    for opt in available_options
+                    option
+                    for option in available_options
                     if not unavailable_timeslots.filter(
                         start_datetime__lt=start_datetime
-                        + timedelta(minutes=opt.duration_time),
+                        + timedelta(minutes=option.duration_time),
                         end_datetime__gt=start_datetime,
                     ).exists()
                 ]
@@ -127,8 +127,8 @@ class RequestReservationView(APIView):
                 if valid_options:
                     options_info = ", ".join(
                         [
-                            f"{opt.name} (소요 시간: {opt.duration_time}분)"
-                            for opt in valid_options
+                            f"{option.name} (소요 시간: {option.duration_time}분)"
+                            for option in valid_options
                         ]
                     )
                     return Response(
