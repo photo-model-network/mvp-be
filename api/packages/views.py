@@ -1,12 +1,9 @@
 from api.packages.models import Package
 from api.packages.serializers import PackageCUDSerializer, PackageListSerializer, PackageDetailSerializer
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework.response import Response
-from rest_framework import generics
-from rest_framework import status
-from rest_framework.views import APIView
+from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveAPIView, UpdateAPIView, DestroyAPIView
 
-class PackageCreateView(generics.CreateAPIView):
+class PackageCreateView(CreateAPIView):
     
     permission_classes = [IsAuthenticated]
 
@@ -15,7 +12,7 @@ class PackageCreateView(generics.CreateAPIView):
 
 
 
-class PackageListView(generics.ListAPIView):
+class PackageListView(ListAPIView):
     
     permission_classes = [AllowAny]
     """
@@ -25,7 +22,7 @@ class PackageListView(generics.ListAPIView):
     serializer_class = PackageListSerializer
 
 
-class PackageDetailView(generics.RetrieveAPIView):
+class PackageDetailView(RetrieveAPIView):
     
     permission_classes = [AllowAny]
     """
@@ -36,7 +33,7 @@ class PackageDetailView(generics.RetrieveAPIView):
 
     
 
-class PackageUpdateView(generics.UpdateAPIView):
+class PackageUpdateView(UpdateAPIView):
     
     permission_classes = [IsAuthenticated]
     """
@@ -47,7 +44,7 @@ class PackageUpdateView(generics.UpdateAPIView):
 
     
 
-class PackageDeleteView(generics.DestroyAPIView):
+class PackageDeleteView(DestroyAPIView):
     
     permission_classes = [IsAuthenticated]
     """
@@ -55,6 +52,3 @@ class PackageDeleteView(generics.DestroyAPIView):
     """
     queryset = Package.objects.all()
     serializer_class = PackageCUDSerializer
-
-
-    
