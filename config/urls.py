@@ -53,6 +53,7 @@ today_datetime = datetime.now(settings.KST).date()
 api_urlpatterns = [
     path(f"admin/{today_datetime}/", admin.site.urls),
     path("api/", include("api.accounts.urls")),
+    path("api/", include("api.packages.urls")),
     path("api/", include("api.reservations.urls")),
 ]
 
