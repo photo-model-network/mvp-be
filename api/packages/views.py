@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveAPIView, UpdateAPIView, DestroyAPIView
+from django.shortcuts import get_object_or_404
 from api.packages.models import Package
 from api.accounts.models import User
 
@@ -60,24 +61,16 @@ class PackageDeleteView(DestroyAPIView):
 
 
 class ProviderPackagesListView(APIView):
-
-    permission_classes = [IsAuthenticated]
     """
     /packages?user={userId} 요청을 받아서 해당 유저가 등록한 패키지들을 반환
     """
     def get(self, request, *args, **kwargs):
-        provider_id = request.query_params.get('provider')
+        provider_id = request.GET.get('user')
         if not provider_id:
             return Response({"error": "user parameter is required"}, status=status.HTTP_400_BAD_REQUEST)
 
-        try:
-            provider = User.objects.get(id=provider_id)
-        except User.DoesNotExist:
-            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+        provider = get_object_or_404(User, id=provider_id)
 
-        if not provider.is_approved:
-            return Response({"error": "User is not approved"}, status=status.HTTP_403_FORBIDDEN)
-
-        packages = Package.objects.filter(provider_id=provider_id)
+        packages = Package.objects.filter(provider=provider)
         serializer = PackageListSerializer(packages, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
