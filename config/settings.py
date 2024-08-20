@@ -163,7 +163,7 @@ GOOGLE_CLIENT = config("GOOGLE_CLIENT", cast=str)
 GOOGLE_SECRET = config("GOOGLE_SECRET", cast=str)
 SOCIAL_CALLBACK_URI = config("SOCIAL_CALLBACK_URI", cast=str)
 
-PORTONE_SECRET = config("PORTONE_SECRET", cast=str)
+# PORTONE_SECRET = config("PORTONE_SECRET", cast=str)
 
 # REST Simple JWT 설정
 
