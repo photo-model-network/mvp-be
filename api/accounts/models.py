@@ -31,8 +31,8 @@ class User(AbstractUser):
     real_name = models.CharField(max_length=255, blank=True, null=True)
     # 본인 휴대폰 번호
     phone_number = models.CharField(max_length=20, blank=True, null=True)
-    # 본인 인증 여부
-    is_authenticated = models.BooleanField(default=False)
+    # 본인 인증 여부 (로그인 여부 X)
+    is_identified = models.BooleanField(default=False)
 
     # 사업자 등록 번호
     business_license_number = models.CharField(max_length=30, blank=True, null=True)
