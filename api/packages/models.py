@@ -8,6 +8,7 @@ from api.accounts.models import User
 
 class PackagePicture(CommonModel):
     """촬영 패키지 소개 이미지 (여러장)"""
+
     package = models.ForeignKey("Package", on_delete=models.CASCADE)
     image = models.URLField()
 
@@ -26,6 +27,7 @@ class PackagePolicy(CommonModel):
 
 class PackageOption(CommonModel):
     """촬영 패키지 세부 옵션"""
+
     package = models.ForeignKey("Package", on_delete=models.CASCADE)
     # 옵션명
     name = models.CharField(max_length=200)
@@ -53,6 +55,7 @@ class PackageOption(CommonModel):
 
 class PackageProvider(CommonModel):
     """촬영 패키지 제공자 정보"""
+
     # 문의 받을 이메일 (*필수)
     inquiry_email = models.EmailField(blank=False)
     # 문의 받을 전화번호 (*필수)
@@ -73,16 +76,6 @@ class PackageProvider(CommonModel):
     class Meta:
         verbose_name = "패키지 제공자 정보"
         verbose_name_plural = "패키지 제공자 정보"
-
-
-class PackageReview(CommonModel):
-    package = models.ForeignKey("Package", on_delete=models.CASCADE)
-    customer = models.ForeignKey(User, on_delete=models.CASCADE)
-    comment = models.TextField()
-
-    class Meta:
-        verbose_name = "패키지 리뷰"
-        verbose_name_plural = "패키지 리뷰"
 
 
 class PackageTag(TagBase):
