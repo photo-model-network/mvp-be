@@ -1,5 +1,5 @@
 from api.reviews.models import Review
-from api.reviews.serializers import ReviewCUDSerializer
+from api.reviews.serializers import ReviewCUDSerializer, ReviewListSerializer
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveAPIView, UpdateAPIView, DestroyAPIView
 
@@ -15,7 +15,7 @@ class ReviewListView(ListAPIView):
     
     permission_classes = [AllowAny]
     queryset = Review.objects.all()
-    serializer_class = ReviewCUDSerializer
+    serializer_class = ReviewListSerializer
 
 
 class ReviewDetailView(RetrieveAPIView):
