@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 class RequestReservationView(APIView):
     """구매자가 예약 신청"""
 
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def post(self, request):
 

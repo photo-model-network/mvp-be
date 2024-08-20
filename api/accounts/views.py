@@ -79,7 +79,6 @@ class GoogleView(APIView):
                 user.save()
 
             refresh = RefreshToken.for_user(user)
-            login(request, user)
 
             return Response(
                 {"refresh": str(refresh), "access": str(refresh.access_token)},
@@ -172,7 +171,6 @@ class NaverView(APIView):
                 user.save()
 
             refresh = RefreshToken.for_user(user)
-            login(request, user)
 
             return Response(
                 {"refresh": str(refresh), "access": str(refresh.access_token)},
