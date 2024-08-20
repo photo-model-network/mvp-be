@@ -13,11 +13,6 @@ class PackageCreateView(generics.CreateAPIView):
     queryset = Package.objects.all()
     serializer_class = PackageCUDSerializer
 
-    def create(self, request):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        return Response(serializer.data, status=201)
 
 
 class PackageListView(generics.ListAPIView):
@@ -29,11 +24,6 @@ class PackageListView(generics.ListAPIView):
     queryset = Package.objects.all()
     serializer_class = PackageListSerializer
 
-    def list(self, request):
-        queryset = self.get_queryset()
-        serializer_class = self.get_serializer_class()
-        serializer = serializer_class(queryset, many=True)
-        return Response(serializer.data)
 
 class PackageDetailView(generics.RetrieveAPIView):
     
@@ -44,10 +34,6 @@ class PackageDetailView(generics.RetrieveAPIView):
     queryset = Package.objects.all()
     serializer_class = PackageDetailSerializer
 
-    def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer = self.get_serializer(instance)
-        return Response(serializer.data, status=status.HTTP_200_OK)
     
 
 class PackageUpdateView(generics.UpdateAPIView):
@@ -59,13 +45,6 @@ class PackageUpdateView(generics.UpdateAPIView):
     queryset = Package.objects.all()
     serializer_class = PackageCUDSerializer
 
-    def update(self, request, *args, **kwargs):
-        partial = kwargs.pop('partial', False)  # 부분 업데이트 허용할지 여부를 나타냄
-        instance = self.get_object()    # get_object()가 pk로 필터링함.
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-        return Response(serializer.data)
     
 
 class PackageDeleteView(generics.DestroyAPIView):
@@ -78,8 +57,4 @@ class PackageDeleteView(generics.DestroyAPIView):
     serializer_class = PackageCUDSerializer
 
 
-    def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()
-        self.perform_destroy(instance)
-        return Response(status=204)
     
