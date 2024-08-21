@@ -6,6 +6,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
+from PublicDataReader import Nts
 from .models import User
 
 import logging
@@ -100,7 +101,7 @@ class NaverView(APIView):
     """네이버 소셜 연동 회원가입 및 로그인"""
 
     permission_classes = [AllowAny]
-
+    
     def post(self, request):
         try:
 
@@ -227,3 +228,49 @@ class BankVerificationView(APIView):
             return Response(
                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+
+class BusinessStatusView(APIView): 
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):   # 국세청_사업자등록정보 상태조회
+        business_license_number = request.data.get('business_license_number')
+        if not business_license_number:
+            return Response({"error": "사업자 등록 번호가 필요합니다."}, status=status.HTTP_400_BAD_REQUEST)
+
+        nts = Nts(settings.NTS_API_KEY)
+        try:
+            # 상태조회 API 호출
+            status_result = nts.status([business_license_number])
+            if status_result is None or status_result.empty:
+                return Response({"error": "NTS API로부터 유효한 응답을 받지 못했습니다."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
+            status_data = status_result.iloc[0]
+            logger.debug(status_data)
+            if status_data['b_stt_cd'] == '01':  # 정상 사업자라는 의미.
+                user = User.objects.filter(business_license_number=business_license_number).first()
+                if user:
+                    user.is_business = True
+                    user.save()
+                return Response({"status": "사업자번호가 유효합니다.", "data": status_data.to_dict()}, status=status.HTTP_200_OK)
+            else:
+                return Response({"status": "사업자 번호가 유효하지 않습니다.", "data": status_data.to_dict()}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    # def post(self, request, *args, **kwargs):   # 국세청_사업자등록정보 진위확인 >  보류
+    #     businesses = request.data.get('businesses')
+    #     if not businesses:
+    #         return Response({"error": "사업자 등록 정보가 필요합니다."}, status=status.HTTP_400_BAD_REQUEST)
+
+    #     nts = Nts(settings.NTS_API_KEY)
+    #     try:
+    #         # 진위확인 API 호출
+    #         validate_result = nts.validate(businesses)
+    #         if validate_result is None or validate_result.empty:
+    #             return Response({"error": "NTS API로부터 유효한 응답을 받지 못했습니다."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
+    #         return Response({"status": "진위확인 결과입니다.", "data": validate_result.to_dict(orient='records')}, status=status.HTTP_200_OK)
+    #     except Exception as e:
+    #         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
