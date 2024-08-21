@@ -9,6 +9,7 @@ from django.shortcuts import get_object_or_404
 from api.packages.models import Package
 from api.accounts.models import User
 
+
 class PackageCreateView(CreateAPIView):
     
     permission_classes = [IsAuthenticated]
@@ -62,12 +63,12 @@ class PackageDeleteView(DestroyAPIView):
 
 class ProviderPackagesListView(APIView):
     """
-    /packages?user={userId} 요청을 받아서 해당 유저가 등록한 패키지들을 반환
+    /packages/provider?user=user_id 요청을 받아서 해당 유저가 등록한 패키지들을 반환.
     """
     def get(self, request, *args, **kwargs):
-        provider_id = request.GET.get('user')
+        provider_id = request.query_params.get('user')
         if not provider_id:
-            return Response({"error": "user parameter is required"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "유저 아이디가 필요합니다."}, status=status.HTTP_400_BAD_REQUEST)
 
         provider = get_object_or_404(User, id=provider_id)
 
