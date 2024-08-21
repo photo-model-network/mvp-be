@@ -1,39 +1,24 @@
 from api.reviews.models import Review
-from api.reviews.serializers import ReviewCUDSerializer, ReviewListSerializer
+from api.reviews.serializers import ReviewCUDSerializer
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveAPIView, UpdateAPIView, DestroyAPIView
+from rest_framework.generics import CreateAPIView, ListAPIView, UpdateAPIView, DestroyAPIView
 
-class ReviewCreateView(CreateAPIView):
+class ReviewCreateListView(CreateAPIView, ListAPIView):
     
     permission_classes = [IsAuthenticated]
-
-    queryset = Review.objects.all()
     serializer_class = ReviewCUDSerializer
 
-
-class ReviewListView(ListAPIView):
+    def get_queryset(self):
+        package_id = self.kwargs['packages_id']
+        return Review.objects.filter(package=package_id)
     
-    permission_classes = [AllowAny]
-    queryset = Review.objects.all()
-    serializer_class = ReviewListSerializer
+    def perform_create(self, serializer):
+        package_id = self.kwargs['packages_id']
+        serializer.save(customer=self.request.user, package_id=package_id)
 
 
-class ReviewDetailView(RetrieveAPIView):
-    
-    permission_classes = [AllowAny]
-    queryset = Review.objects.all()
-    serializer_class = ReviewCUDSerializer
-
-
-class ReviewUpdateView(UpdateAPIView):
+class ReviewUpdateDeleteView(UpdateAPIView, DestroyAPIView):
         
-    permission_classes = [IsAuthenticated]
-    queryset = Review.objects.all()
-    serializer_class = ReviewCUDSerializer
-    lookup_field = 'id'
-
-
-class ReviewDeleteView(DestroyAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Review.objects.all()
     serializer_class = ReviewCUDSerializer

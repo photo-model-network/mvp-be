@@ -6,9 +6,3 @@ class ReviewCUDSerializer(ModelSerializer):
     class Meta:
         model = Review
         fields = ['package', 'customer', 'comment']
-
-class ReviewListSerializer(ModelSerializer):
-
-    class Meta:
-        model = Review
-        fields = ['package', 'customer']
