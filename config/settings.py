@@ -51,6 +51,7 @@ CUSTOM_APPS = [
     "api.payments",
     "api.reservations",
     "api.packages",
+    "api.reviews",
     "api.timeslots",
     "api",
 ]
@@ -164,6 +165,8 @@ GOOGLE_SECRET = config("GOOGLE_SECRET", cast=str)
 SOCIAL_CALLBACK_URI = config("SOCIAL_CALLBACK_URI", cast=str)
 
 # PORTONE_SECRET = config("PORTONE_SECRET", cast=str)
+
+APICK_SECRET = config("APICK_SECRET", cast=str)
 
 # REST Simple JWT 설정
 

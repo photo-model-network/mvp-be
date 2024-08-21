@@ -180,10 +180,50 @@ class NaverView(APIView):
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class LogoutView(APIView):
+# class LogoutView(APIView):
+
+#     permission_classes = [IsAuthenticated]
+
+#     def post(self, request):
+#         logout(request)
+#         return Response({"message": "로그아웃 성공!"}, status=status.HTTP_200_OK)
+
+
+class BankVerificationView(APIView):
 
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        logout(request)
-        return Response({"message": "로그아웃 성공!"}, status=status.HTTP_200_OK)
+
+        try:
+            # 은행 계좌번호
+            bank_account = request.data.get("bankAccount")
+            # 은행 코드
+            bank_code = request.data.get("bankCode")
+
+            response = requests.post(
+                "https://apick.app/rest/transfer_1won",
+                headers={
+                    "CL_AUTH_KEY": settings.APICK_SECRET,
+                },
+                data={
+                    "account_num": bank_account,
+                    "bank_code": bank_code,
+                },
+            )
+
+            if response.status_code == 200:
+
+                return Response(
+                    {"message": "1원이 전송되었습니다. 인증 코드를 입력해 주세요."},
+                    status=status.HTTP_200_OK,
+                )
+            else:
+                return Response(
+                    {"message": "계좌 인증 요청이 실패했습니다."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+        except requests.exceptions.RequestException as e:
+            return Response(
+                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
