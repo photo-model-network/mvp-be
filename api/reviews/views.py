@@ -29,14 +29,19 @@ class ReviewListView(ListAPIView):
 class ReviewUpdateView(UpdateAPIView):
     
     permission_classes = [IsAuthenticated]
-    queryset = Review.objects.all()
     serializer_class = ReviewCRUDSerializer
-    lookup_field = 'id'
+
+    def get_queryset(self):
+        return Review.objects.filter(customer=self.request.user)
 
 
 class ReviewDeleteView(DestroyAPIView):
         
         permission_classes = [IsAuthenticated]
-        queryset = Review.objects.all()
         serializer_class = ReviewCRUDSerializer
-        lookup_field = 'id'
+
+        def get_queryset(self):
+            user = self.request.user
+            if user.is_superuser:
+                return Review.objects.all()
+            return Review.objects.filter(customer=user)
