@@ -230,6 +230,10 @@ class SendBankVerificationView(APIView):
                     r"\d+", response_data["data"]["입금통장메모"]
                 ).group()
 
+                logger.debug(
+                    f"은행 계좌 인증 추출 코드 bank_verification_code: {bank_verification_code}"
+                )
+
                 user = request.user
 
                 user.bank_verification_code = bank_verification_code
