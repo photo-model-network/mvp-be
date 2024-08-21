@@ -166,15 +166,29 @@ SOCIAL_CALLBACK_URI = config("SOCIAL_CALLBACK_URI", cast=str)
 
 # PORTONE_SECRET = config("PORTONE_SECRET", cast=str)
 
+APICK_SECRET = config("APICK_SECRET", cast=str)
+
 # REST Simple JWT 설정
 
 REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.AllowAny",
     ],
-    "DEFAULT_AUTHENTICATION_CLASSES": (
+    "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework_simplejwt.authentication.JWTAuthentication",
-    ),
+    ],
+    "DEFAULT_THROTTLE_CLASSES": [
+        # "rest_framework.throttling.AnonRateThrottle",
+        "rest_framework.throttling.UserRateThrottle",
+    ],
+    "DEFAULT_THROTTLE_RATES": {
+        # "anon": "100/day",
+        "user": "5/day",
+    },
+    "PAGINATION": {
+        "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+        "PAGE_SIZE": 10,
+    },
 }
 
 from datetime import timedelta

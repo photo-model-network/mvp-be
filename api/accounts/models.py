@@ -34,6 +34,15 @@ class User(AbstractUser):
     # 본인 인증 여부 (로그인 여부 X)
     is_identified = models.BooleanField(default=False)
 
+    # 은행 계좌번호
+    bank_account = models.CharField(max_length=20, blank=True, null=True)
+    # 은행 코드
+    bank_code = models.CharField(max_length=3, blank=True, null=True)
+    # 1원 인증 코드
+    bank_verification_code = models.CharField(max_length=4, blank=True, null=True)
+    # 은행 계좌 인증 여부
+    bank_verified = models.BooleanField(default=False)
+
     # 사업자 등록 번호
     business_license_number = models.CharField(max_length=30, blank=True, null=True)
     # 사업자 진위 여부
