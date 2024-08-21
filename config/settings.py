@@ -166,6 +166,8 @@ SOCIAL_CALLBACK_URI = config("SOCIAL_CALLBACK_URI", cast=str)
 
 # PORTONE_SECRET = config("PORTONE_SECRET", cast=str)
 
+APICK_SECRET = config("APICK_SECRET", cast=str)
+
 # REST Simple JWT 설정
 
 REST_FRAMEWORK = {

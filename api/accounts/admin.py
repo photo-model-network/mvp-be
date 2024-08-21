@@ -26,7 +26,7 @@ class CustomUserAdmin(UserAdmin):
                 "fields": (
                     "real_name",
                     "phone_number",
-                    "is_authenticated",
+                    "is_identified",
                     "business_license_number",
                     "is_business",
                 ),
