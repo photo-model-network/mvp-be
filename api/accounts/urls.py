@@ -1,18 +1,14 @@
 from django.urls import path
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView,
-)
 from .views import GoogleView, NaverView, KakaoView
-from .views import SendBankVerificationView, ConfirmBankVerificationView
+from .views import SendBankVerificationView, ConfirmBankVerificationView, CustomTokenObtainPairView, CustomTokenRefreshView
 
 urlpatterns = (
     [
         path(
-            "accounts/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"
+            "accounts/token/", CustomTokenObtainPairView.as_view(), name="token_obtain_pair"
         ),
         path(
-            "accounts/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"
+            "accounts/token/refresh/", CustomTokenRefreshView.as_view(), name="token_refresh"
         ),
     ]
     + [

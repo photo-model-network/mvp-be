@@ -6,7 +6,9 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.throttling import UserRateThrottle
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.core.cache import cache
 from .models import User
 
 import logging
@@ -222,6 +224,27 @@ class NaverView(APIView):
             user.set_unusable_password()
             user.save()
         return user
+    
+    
+class CustomTokenObtainPairView(TokenObtainPairView):
+    """토큰 발급 시 redis에 refresh token 저장"""
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+        cache.set(request.user.id, response.data["refresh"], timeout=settings.SIMPLE_JWT["REFRESH_TOKEN_LIFETIME"])
+        return response
+    
+
+class CustomTokenRefreshView(TokenRefreshView):
+    """토큰 갱신 시 redis에 rotate된 refresh token 업데이트"""
+    def post(self, request, *args, **kwargs):
+        
+        if cache.get(request.user.id) != request.data.get("refresh"):
+            return Response({"error": "refresh token이 일치하지 않습니다."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        response = super().post(request, *args, **kwargs)
+        cache.get(request.user.id).set(request.user.id, response.data["refresh"])
+        return response
+
 
 
 # class LogoutView(APIView):
