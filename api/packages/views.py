@@ -31,8 +31,14 @@ class PackageListView(ListAPIView):
         user 쿼리 파라미터가 있는 경우 해당 유저가 등록한 패키지들을 반환
         """
         user_id = self.request.query_params.get("user", None)
+        filter_param = self.request.query_params.get("filter", None)
+
         if user_id is not None:
             return Package.objects.filter(provider__id=user_id)
+        
+        if filter_param == "recent":
+            return Package.objects.order_by('-created_at')[:10]
+        
         return Package.objects.all()
     
 
