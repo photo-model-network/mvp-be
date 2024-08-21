@@ -8,7 +8,7 @@ from .models import User
 class CustomUserAdmin(UserAdmin):
     fieldsets = (
         (
-            "일반 유저 필드",
+            "일반",
             {
                 "fields": (
                     "username",
@@ -21,7 +21,7 @@ class CustomUserAdmin(UserAdmin):
             },
         ),
         (
-            "아티스트 필드",
+            "아티스트",
             {
                 "fields": (
                     "real_name",
@@ -29,6 +29,17 @@ class CustomUserAdmin(UserAdmin):
                     "is_identified",
                     "business_license_number",
                     "is_business",
+                ),
+            },
+        ),
+        (
+            "은행 계좌",
+            {
+                "fields": (
+                    "bank_account",
+                    "bank_code",
+                    "bank_verification_code",
+                    "bank_verified",
                 ),
             },
         ),

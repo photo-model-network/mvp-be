@@ -1,10 +1,11 @@
+import re
 import requests
 from django.conf import settings
-from django.contrib.auth import login, logout
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.throttling import UserRateThrottle
 from rest_framework_simplejwt.tokens import RefreshToken
 from .models import User
 
@@ -189,17 +190,26 @@ class NaverView(APIView):
 #         return Response({"message": "로그아웃 성공!"}, status=status.HTTP_200_OK)
 
 
-class BankVerificationView(APIView):
+class SendBankVerificationView(APIView):
 
     permission_classes = [IsAuthenticated]
+    # 하루 5번 호출가능
+    throttle_classes = [UserRateThrottle]
 
     def post(self, request):
 
+        # 은행 계좌번호
+        bank_account = request.data.get("bankAccount")
+        # 은행 코드
+        bank_code = request.data.get("bankCode")
+
+        if not bank_account or not bank_code:
+            return Response(
+                {"message": "은행 계좌번호와 인증 코드를 필수 항목입니다."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         try:
-            # 은행 계좌번호
-            bank_account = request.data.get("bankAccount")
-            # 은행 코드
-            bank_code = request.data.get("bankCode")
 
             response = requests.post(
                 "https://apick.app/rest/transfer_1won",
@@ -214,6 +224,25 @@ class BankVerificationView(APIView):
 
             if response.status_code == 200:
 
+                response_data = response.json()
+
+                bank_verification_code = re.search(
+                    r"\d+", response_data["data"]["입금통장메모"]
+                ).group()
+
+                user = request.user
+
+                user.bank_verification_code = bank_verification_code
+                user.bank_account = response_data["data"]["계좌번호"]
+                user.bank_code = response_data["data"]["은행코드"]
+                user.save(
+                    update_fields=[
+                        "bank_verification_code",
+                        "bank_account",
+                        "bank_code",
+                    ]
+                )
+
                 return Response(
                     {"message": "1원이 전송되었습니다. 인증 코드를 입력해 주세요."},
                     status=status.HTTP_200_OK,
@@ -226,4 +255,46 @@ class BankVerificationView(APIView):
         except requests.exceptions.RequestException as e:
             return Response(
                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class ConfirmBankVerificationView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+
+        bank_account = request.data.get("bankAccount")
+        bank_verification_code = request.data.get("bankVerificationCode")
+
+        if not bank_account or not bank_verification_code:
+            return Response(
+                {"message": "은행 계좌번호와 인증 코드를 필수 항목입니다."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+
+            user = User.objects.get(
+                id=request.user.id, bank_account=bank_account, bank_verified=False
+            )
+
+            if user.bank_verification_code == bank_verification_code:
+                user.bank_verified = True
+                user.save(update_fields=["bank_verified"])
+
+                return Response(
+                    {"message": "계좌 등록이 성공적으로 완료되었습니다."},
+                    status=status.HTTP_200_OK,
+                )
+            else:
+                return Response(
+                    {"message": "인증 코드가 일치하지 않습니다."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+        except User.DoesNotExist:
+            return Response(
+                {"message": "해당 계좌 인증 정보를 찾을 수 없습니다."},
+                status=status.HTTP_404_NOT_FOUND,
             )
