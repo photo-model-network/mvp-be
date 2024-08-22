@@ -1,4 +1,5 @@
 import re
+import jwt
 import requests
 from django.conf import settings
 from rest_framework import status
@@ -89,6 +90,7 @@ class GoogleView(APIView):
                 user.save()
 
             refresh = RefreshToken.for_user(user)
+            cache.set(user.id, str(refresh), timeout=settings.SIMPLE_JWT["REFRESH_TOKEN_LIFETIME"].total_seconds())
 
             return Response(
                 {"refresh": str(refresh), "access": str(refresh.access_token)},
@@ -109,6 +111,9 @@ class KakaoView(APIView):
     """카카오 소셜 연동 회원가입 및 로그인"""
 
     # 사업자번호를 등록해야 이메일 필드값을 받을 수 있어 추후 연동
+    
+    # jwt 발급 후 
+                # cache.set(user.id, str(refresh), timeout=settings.SIMPLE_JWT["REFRESH_TOKEN_LIFETIME"].total_seconds()) 추가
     pass
 
 
@@ -190,6 +195,7 @@ class NaverView(APIView):
                 user.save()
 
             refresh = RefreshToken.for_user(user)
+            cache.set(user.id, str(refresh), timeout=settings.SIMPLE_JWT["REFRESH_TOKEN_LIFETIME"].total_seconds())
 
             return Response(
                 {"refresh": str(refresh), "access": str(refresh.access_token)},
@@ -251,19 +257,23 @@ class CustomTokenObtainPairView(TokenObtainPairView):
     """토큰 발급 시 redis에 refresh token 저장"""
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
-        cache.set(request.user.id, response.data["refresh"], timeout=settings.SIMPLE_JWT["REFRESH_TOKEN_LIFETIME"])
+        
+        access_token = response.data["access"]
+        user_id = str(jwt.decode(access_token, settings.SIMPLE_JWT["SIGNING_KEY"], algorithms=["HS256"])["user_id"])
+        cache.set(user_id, str(response.data["refresh"]), timeout= int(settings.SIMPLE_JWT["REFRESH_TOKEN_LIFETIME"].total_seconds()))
+        logger.debug(f"refresh token 업데이트: {cache.get(user_id)}")
         return response
     
 
 class CustomTokenRefreshView(TokenRefreshView):
     """토큰 갱신 시 redis에 rotate된 refresh token 업데이트"""
     def post(self, request, *args, **kwargs):
-        
-        if cache.get(request.user.id) != request.data.get("refresh"):
+        user_id = User.objects.get(username=request.data["username"]).id
+        if cache.get(user_id) != request.data.get("refresh"):
             return Response({"error": "refresh token이 일치하지 않습니다."}, status=status.HTTP_400_BAD_REQUEST)
         
         response = super().post(request, *args, **kwargs)
-        cache.get(request.user.id).set(request.user.id, response.data["refresh"])
+        cache.set(request.user.id, response.data["refresh"], timeout=settings.SIMPLE_JWT["REFRESH_TOKEN_LIFETIME"].total_seconds())
         return response
 
 
