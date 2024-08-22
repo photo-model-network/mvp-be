@@ -45,7 +45,7 @@
   <script>
     // Replace with your WebSocket URL
     const wsProtocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
-    const wsUrl = `${wsProtocol}127.0.0.1:8000/chat/?token=`; // Use the correct port if it's different
+    const wsUrl = `${wsProtocol}127.0.0.1:8000/chat/JP7XdQLnEfepCNauxPVH67/?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzI0NDAxNjMzLCJpYXQiOjE3MjQzMTUyMzMsImp0aSI6IjE0ZDZjZjRjNTA3MTRjYmI4ZGIwNGIxYjlhMjdiYjE3IiwidXNlcl9pZCI6InZRNnRkTEZ4YWZ3YW8zQUNZeGdFVTIifQ.ToASs8RoqFgtuHl32e0qoAQW4Da5agvfzJ6fhquGAgc`; // Use the correct port if it's different
     const chatSocket = new WebSocket(wsUrl);
 
     // Add messages to chat log
@@ -69,6 +69,7 @@
       const messageInputDom = document.getElementById('chat-message-input');
       const message = messageInputDom.value;
       chatSocket.send(JSON.stringify({
+        'source': "thumbnail",
         'message': message,
         'user_id': 1  // Replace with the actual user ID if needed
       }));
