@@ -227,31 +227,6 @@ class NaverView(APIView):
                 "state": state,
             },
         )
-
-    def get_naver_user_data(self, access_token):
-        """유저 프로필을 가져오는 함수"""
-        return requests.get(
-            "https://openapi.naver.com/v1/nid/me",
-            headers={
-                "Authorization": f"Bearer {access_token}",
-            },
-        )
-
-    def get_or_create_user(self, email, response):
-        """유저를 생성하거나 가져오는 함수"""
-        user, created = User.objects.get_or_create(
-            username=email,
-            defaults={
-                "email": email,
-                "avatar": response.get("profile_image"),
-                "name": response.get("nickname") or response.get("name"),
-            },
-        )
-        if created:
-            user.set_unusable_password()
-            user.save()
-        return user
-    
     
 class CustomTokenObtainPairView(TokenObtainPairView):
     """토큰 발급 시 redis에 refresh token 저장"""
