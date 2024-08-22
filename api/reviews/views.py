@@ -32,7 +32,7 @@ class ReviewUpdateView(UpdateAPIView):
     serializer_class = ReviewCRUDSerializer
 
     def get_queryset(self):
-        return Review.objects.filter(customer=self.request.user)
+        return Review.objects.filter(customer=self.request.user, id=self.kwargs['pk'])
 
 
 class ReviewDeleteView(DestroyAPIView):
@@ -42,6 +42,5 @@ class ReviewDeleteView(DestroyAPIView):
 
         def get_queryset(self):
             user = self.request.user
-            if user.is_superuser:
-                return Review.objects.all()
-            return Review.objects.filter(customer=user)
+            queryset = Review.objects.all() if user.is_superuser else Review.objects.filter(customer=user)
+            return queryset.filter(id=self.kwargs['pk'])
