@@ -211,22 +211,6 @@ class NaverView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-    def get_naver_token(self, code, state):
-        """네이버 토큰을 가져오는 헬퍼 함수"""
-        return requests.post(
-            "https://nid.naver.com/oauth2.0/token",
-            headers={
-                "Content-Type": "application/x-www-form-urlencoded",
-            },
-            data={
-                "grant_type": "authorization_code",
-                "client_id": settings.NAVER_CLIENT,
-                "client_secret": settings.NAVER_SECRET,
-                "redirect_uri": settings.SOCIAL_CALLBACK_URI,
-                "code": code,
-                "state": state,
-            },
-        )
     
 class CustomTokenObtainPairView(TokenObtainPairView):
     """토큰 발급 시 redis에 refresh token 저장"""
