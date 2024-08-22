@@ -5,8 +5,8 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework.throttling import UserRateThrottle
 from rest_framework_simplejwt.tokens import RefreshToken
+from .throttles import SendBankVerificationThrottle
 from .models import User
 
 import logging
@@ -236,8 +236,7 @@ class NaverView(APIView):
 class SendBankVerificationView(APIView):
 
     permission_classes = [IsAuthenticated]
-    # 하루 5번 호출가능
-    throttle_classes = [UserRateThrottle]
+    throttle_classes = [SendBankVerificationThrottle]
 
     def post(self, request):
 
@@ -301,7 +300,8 @@ class SendBankVerificationView(APIView):
                 )
         except requests.exceptions.RequestException as e:
             return Response(
-                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                {"error": "네트워크 오류가 발생했습니다."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
 
