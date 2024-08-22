@@ -33,9 +33,9 @@ urlpatterns = (
             ConfirmBankVerificationView.as_view(),
             name="bank_verification_confirm",
         ),
-        # 국세청_사업자등록정보 상태조회
+        # 국세청_사업자등록정보 유효성검증
         path(
-            "accounts/business/verify/", BusinessStatusView.as_view(), name="tax_verify"
+            "accounts/business/validate/", BusinessStatusView.as_view(), name="tax_verify"
         ),
     ]
 )

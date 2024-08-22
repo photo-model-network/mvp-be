@@ -352,27 +352,37 @@ class BusinessStatusView(APIView):
 
     permission_classes = [IsAuthenticated]
 
-    def post(self, request, *args, **kwargs):   # 국세청_사업자등록정보 상태조회
-        business_license_number = request.data.get('business_license_number')
-        if not business_license_number:
-            return Response({"error": "사업자 등록 번호가 필요합니다."}, status=status.HTTP_400_BAD_REQUEST)
+    def post(self, request, *args, **kwargs):
+        b_no = request.data.get('b_no')
+        start_dt = request.data.get('start_dt')
+        p_nm = request.data.get('p_nm')
+
+        if not b_no or not start_dt or not p_nm:
+            return Response({"error": "사업자등록번호, 설립일자, 대표자 이름 모두 필요합니다."}, status=status.HTTP_400_BAD_REQUEST)
 
         nts = Nts(settings.NTS_API_KEY)
         try:
             # 상태조회 API 호출
-            status_result = nts.status([business_license_number])
-            if status_result is None or status_result.empty:
+            business = [{'b_no': f"{b_no}",     # 사업자등록번호
+                         'start_dt': start_dt,  # 설립일자
+                         'p_nm': p_nm}]         # 대표자명
+            logger.debug(business)
+            df = nts.validate(business)
+            df_dict = df.to_dict(orient='records')
+            logger.debug(df_dict)
+
+            if not df_dict:
                 return Response({"error": "NTS API로부터 유효한 응답을 받지 못했습니다."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            # logger.debug(status_result)
-            status_data = status_result.iloc[0]
-            logger.debug(status_data)
-            if status_data['b_stt_cd'] == '01':  # 정상 사업자라는 의미.
-                user = User.objects.filter(business_license_number=business_license_number).first()
-                if user:
-                    user.is_business = True
-                    user.save()
-                return Response({"status": "사업자번호가 유효합니다.", "data": status_data.to_dict()}, status=status.HTTP_200_OK)
+            
+            status_data = df_dict[0]
+            if status_data['status.b_stt_cd'] == '01':  # 정상 사업자라 >> User 모델에 사업자번호 저장, is_business=True로 변경
+                user = request.user
+                user.business_license_number = b_no
+                user.is_business = True
+                user.save()
+                return Response({"status": "사업자번호가 유효합니다.", "data": status_data}, status=status.HTTP_200_OK)
             else:
-                return Response({"status": "사업자 번호가 유효하지 않습니다.", "data": status_data.to_dict()}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"status": "사업자 번호가 유효하지 않습니다.", "data": status_data}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
+            logger.error(f"Error: {e}")
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
