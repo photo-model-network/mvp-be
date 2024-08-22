@@ -4,8 +4,7 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 from .views import GoogleView, NaverView, KakaoView
-from .views import SendBankVerificationView, ConfirmBankVerificationView
-from .views import BankVerificationView, BusinessStatusView
+from .views import SendBankVerificationView, ConfirmBankVerificationView, BusinessStatusView
 
 urlpatterns = (
     [
