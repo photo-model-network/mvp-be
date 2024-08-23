@@ -344,6 +344,7 @@ class BusinessVerificationView(APIView):
                 f"https://api.odcloud.kr/api/nts-businessman/v1/status?serviceKey={settings.NTS_SECRET}",
                 headers={
                 "Content-Type": "application/json",
+                "Accept": "application/json",
                     },                  
                 data=json.dumps({           # json.dumps()를 사용하여 dict를 json으로 변환 > 오류방지
                     "b_no": [businessNum],
