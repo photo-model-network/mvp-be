@@ -1,4 +1,5 @@
 import re
+import json
 import requests
 from django.conf import settings
 from rest_framework import status
@@ -7,7 +8,6 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.throttling import UserRateThrottle
 from rest_framework_simplejwt.tokens import RefreshToken
-from PublicDataReader import Nts
 from .models import User
 
 import logging
@@ -348,41 +348,29 @@ class ConfirmBankVerificationView(APIView):
             )
 
 
-class BusinessStatusView(APIView): 
+class BusinessVerificationView(APIView): 
 
     permission_classes = [IsAuthenticated]
 
-    def post(self, request, *args, **kwargs):
-        b_no = request.data.get('b_no')
-        start_dt = request.data.get('start_dt')
-        p_nm = request.data.get('p_nm')
+    def post(self, request):
 
-        if not b_no or not start_dt or not p_nm:
-            return Response({"error": "사업자등록번호, 설립일자, 대표자 이름 모두 필요합니다."}, status=status.HTTP_400_BAD_REQUEST)
+        businessNum = request.data.get('businessNum')
 
-        nts = Nts(settings.NTS_API_KEY)
+        if not businessNum :
+            return Response({"error": "10자리 사업자등록번호를 "-"없이 입력해주세요."}, status=status.HTTP_400_BAD_REQUEST)
+
         try:
-            # 상태조회 API 호출
-            business = [{'b_no': f"{b_no}",     # 사업자등록번호
-                         'start_dt': start_dt,  # 설립일자
-                         'p_nm': p_nm}]         # 대표자명
-            logger.debug(business)
-            df = nts.validate(business)
-            df_dict = df.to_dict(orient='records')
-            logger.debug(df_dict)
-
-            if not df_dict:
-                return Response({"error": "NTS API로부터 유효한 응답을 받지 못했습니다."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-            
-            status_data = df_dict[0]
-            if status_data['status.b_stt_cd'] == '01':  # 정상 사업자라 >> User 모델에 사업자번호 저장, is_business=True로 변경
-                user = request.user
-                user.business_license_number = b_no
-                user.is_business = True
-                user.save()
-                return Response({"status": "사업자번호가 유효합니다.", "data": status_data}, status=status.HTTP_200_OK)
-            else:
-                return Response({"status": "사업자 번호가 유효하지 않습니다.", "data": status_data}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            logger.error(f"Error: {e}")
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            response = requests.post(
+                f"https://api.odcloud.kr/api/nts-businessman/v1/status?serviceKey={settings.NTS_SECRET}",
+                headers={
+                "Content-Type": "application/json",
+                    },                  
+                data=json.dumps({           # json.dumps()를 사용하여 dict를 json으로 변환 > 오류방지
+                    "b_no": [businessNum],
+                }),
+        )
+        except requests.exceptions.RequestException as e:
+            return Response(
+                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )   
+        return Response(response.json(), status=status.HTTP_200_OK)

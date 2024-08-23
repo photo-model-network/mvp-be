@@ -4,7 +4,7 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 from .views import GoogleView, NaverView, KakaoView
-from .views import SendBankVerificationView, ConfirmBankVerificationView, BusinessStatusView
+from .views import SendBankVerificationView, ConfirmBankVerificationView, BusinessVerificationView
 
 urlpatterns = (
     [
@@ -35,7 +35,7 @@ urlpatterns = (
         ),
         # 국세청_사업자등록정보 유효성검증
         path(
-            "accounts/business/validate/", BusinessStatusView.as_view(), name="tax_verify"
+            "accounts/business/verify/", BusinessVerificationView.as_view(), name="business_verification"
         ),
     ]
 )
