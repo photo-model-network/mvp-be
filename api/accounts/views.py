@@ -334,9 +334,9 @@ class BusinessVerificationView(APIView):
 
     def post(self, request):
 
-        businessNum = request.data.get('businessNum')
+        business_num = request.data.get('business_num')
 
-        if not businessNum :
+        if not business_num :
             return Response({"error": "10자리 사업자등록번호를 "-"없이 입력해주세요."}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
@@ -347,11 +347,13 @@ class BusinessVerificationView(APIView):
                 "Accept": "application/json",
                     },                  
                 data=json.dumps({           # json.dumps()를 사용하여 dict를 json으로 변환 > 오류방지
-                    "b_no": [businessNum],
+                    "b_no": [business_num],
                 }),
         )
+            return Response(response.json(), status=status.HTTP_200_OK)
+        
         except requests.exceptions.RequestException as e:
             return Response(
                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )   
-        return Response(response.json(), status=status.HTTP_200_OK)
+        
