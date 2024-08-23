@@ -3,6 +3,14 @@
 .env
 /staticfiles
 dump.rdb
+api/accounts/migrations/
+api/chats/migrations/
+api/common/migrations/
+api/packages/migrations/
+api/payments/migrations/
+api/reservations/migrations/
+api/reviews/migrations/
+api/timeslots/migrations/
 
 ### Django ###
 *.log
