@@ -334,7 +334,7 @@ class BusinessVerificationView(APIView):
 
     def post(self, request):
 
-        business_num = request.data.get('business_num')
+        business_num = request.data.get('business_Num')
 
         if not business_num :
             return Response({"error": "10자리 사업자등록번호를 "-"없이 입력해주세요."}, status=status.HTTP_400_BAD_REQUEST)
