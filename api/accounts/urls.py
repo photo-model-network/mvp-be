@@ -1,6 +1,8 @@
 from django.urls import path
 from .views import GoogleView, NaverView, KakaoView
-from .views import SendBankVerificationView, ConfirmBankVerificationView, TokenObtainPairView, TokenRefreshView, BusinessVerificationView, LogoutView
+from .views import SendBankVerificationView, ConfirmBankVerificationView, TokenObtainPairView, TokenRefreshView, BusinessVerificationView
+from rest_framework_simplejwt.views import TokenBlacklistView
+
 
 urlpatterns = (
     [
@@ -10,7 +12,7 @@ urlpatterns = (
         path(
             "accounts/token/refresh/",TokenRefreshView.as_view(), name="token_refresh"
         ),
-        path("accounts/logout/", LogoutView.as_view(), name="logout"),
+        path("accounts/logout/", TokenBlacklistView.as_view(), name="logout"),
     ]
     + [
         path("accounts/google/login/", GoogleView.as_view(), name="google_login"),
