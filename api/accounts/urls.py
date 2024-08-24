@@ -1,15 +1,16 @@
 from django.urls import path
 from .views import GoogleView, NaverView, KakaoView
-from .views import SendBankVerificationView, ConfirmBankVerificationView, CustomTokenObtainPairView, CustomTokenRefreshView, BusinessVerificationView
+from .views import SendBankVerificationView, ConfirmBankVerificationView, TokenObtainPairView, TokenRefreshView, BusinessVerificationView, LogoutView
 
 urlpatterns = (
     [
         path(
-            "accounts/token/", CustomTokenObtainPairView.as_view(), name="token_obtain_pair"
+            "accounts/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"
         ),
         path(
-            "accounts/token/refresh/", CustomTokenRefreshView.as_view(), name="token_refresh"
+            "accounts/token/refresh/",TokenRefreshView.as_view(), name="token_refresh"
         ),
+        path("accounts/logout/", LogoutView.as_view(), name="logout"),
     ]
     + [
         path("accounts/google/login/", GoogleView.as_view(), name="google_login"),
