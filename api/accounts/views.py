@@ -1,4 +1,5 @@
 import re
+import json
 import jwt
 import requests
 from django.conf import settings
@@ -121,7 +122,7 @@ class NaverView(APIView):
     """네이버 소셜 연동 회원가입 및 로그인"""
 
     permission_classes = [AllowAny]
-
+    
     def post(self, request):
 
         code = request.data.get("code")
@@ -358,3 +359,33 @@ class ConfirmBankVerificationView(APIView):
                 {"message": "해당 계좌 인증 정보를 찾을 수 없습니다."},
                 status=status.HTTP_404_NOT_FOUND,
             )
+
+
+class BusinessVerificationView(APIView): 
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+
+        business_num = request.data.get('businessNum')
+
+        if not business_num :
+            return Response({"error": "10자리 사업자등록번호를 "-"없이 입력해주세요."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            response = requests.post(
+                f"https://api.odcloud.kr/api/nts-businessman/v1/status?serviceKey={settings.NTS_SECRET}",
+                headers={
+                "Content-Type": "application/json",
+                    },                  
+                data=json.dumps({           # json.dumps()를 사용하여 dict를 json으로 변환 > 오류방지
+                    "b_no": [business_num],
+                }),
+        )
+            return Response(response.json(), status=status.HTTP_200_OK)
+        
+        except requests.exceptions.RequestException as e:
+            return Response(
+                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )   
+        

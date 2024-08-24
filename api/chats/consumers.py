@@ -1,13 +1,89 @@
-from channels.generic.websocket import WebsocketConsumer
+import json
+from channels.generic.websocket import AsyncWebsocketConsumer
+from channels.db import database_sync_to_async
+from api.accounts.models import User
+from .models import ChatRoom, Message
 
 
-class ChatConsumer(WebsocketConsumer):
-    def connect(self):
-        user = self.scope["user"]
-        if not user.is_authenticated:
-            self.close()
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+class ChatConsumer(AsyncWebsocketConsumer):
+
+    async def connect(self):
+        self.user = self.scope["user"]
+
+        if not self.user.is_authenticated:
+            await self.close()
+            return
+
+        self.other_user = self.scope["url_route"]["kwargs"]["uid"]
+
+        self.room = await self.get_or_create_chatroom(self.user.id, self.other_user)
+        self.room_group_name = f"chat_{self.room.id}"
+
+        await self.channel_layer.group_add(
+            self.room_group_name,
+            self.channel_name,
+        )
+
+        await self.accept()
+
+    async def disconnect(self, code):
+        await self.channel_layer.group_discard(
+            self.room_group_name,
+            self.channel_name,
+        )
+
+    async def receive(self, text_data):
+        data = json.loads(text_data)
+        message = data["message"]
+
+        await self.save_message(self.user, self.room, message)
+
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                "type": "chat_message",
+                "message": message,
+                "sender": self.user.id,
+            },
+        )
+
+    async def chat_message(self, event):
+        message = event["message"]
+        sender = event["sender"]
+
+        await self.send(
+            text_data=json.dumps(
+                {
+                    "message": message,
+                    "sender": sender,
+                }
+            )
+        )
+
+    @database_sync_to_async
+    def get_or_create_chatroom(self, uid1, uid2):
+        # 두 사용자를 이용해 채팅방을 생성하거나 가져옵니다.
+        users = User.objects.filter(id__in=[uid1, uid2])
+        # 두 사용자가 모두 포함된 방을 필터링
+        room = ChatRoom.objects.filter(participants__in=users).distinct()
+
+        if room.count() == 1:
+            return room.first()
+        elif room.count() > 1:
+            # 예외 처리 또는 로깅: 동일한 조건의 방이 여러 개 존재할 때
+            raise Exception("해당 참가자들에 대해 여러 개의 채팅방이 발견되었습니다.")
         else:
-            self.accept()
+            # 채팅방을 새로 생성
+            room = ChatRoom.objects.create()
+            room.participants.add(*users)
+            room.save()
+            return room
 
-    def disconnect(self, code):
-        pass
+    @database_sync_to_async
+    def save_message(self, sender, room, message):
+        return Message.objects.create(sender=sender, room=room, message=message)

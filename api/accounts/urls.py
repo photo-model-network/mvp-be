@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import GoogleView, NaverView, KakaoView
-from .views import SendBankVerificationView, ConfirmBankVerificationView, CustomTokenObtainPairView, CustomTokenRefreshView
+from .views import SendBankVerificationView, ConfirmBankVerificationView, CustomTokenObtainPairView, CustomTokenRefreshView, BusinessVerificationView
 
 urlpatterns = (
     [
@@ -28,6 +28,10 @@ urlpatterns = (
             "accounts/bank/verification/confirm/",
             ConfirmBankVerificationView.as_view(),
             name="bank_verification_confirm",
+        ),
+        # 국세청_사업자등록정보 유효성검증
+        path(
+            "accounts/business/verify/", BusinessVerificationView.as_view(), name="business_verification"
         ),
     ]
 )

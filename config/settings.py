@@ -172,6 +172,7 @@ SOCIAL_CALLBACK_URI = config("SOCIAL_CALLBACK_URI", cast=str)
 
 APICK_SECRET = config("APICK_SECRET", cast=str)
 
+NTS_SECRET= config("NTS_SECRET", cast=str)
 # REST Simple JWT 설정
 
 REST_FRAMEWORK = {
