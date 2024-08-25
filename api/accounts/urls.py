@@ -2,9 +2,14 @@ from django.urls import path
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
+    TokenBlacklistView,
 )
 from .views import GoogleView, NaverView, KakaoView
-from .views import SendBankVerificationView, ConfirmBankVerificationView, BusinessVerificationView
+from .views import (
+    SendBankVerificationView,
+    ConfirmBankVerificationView,
+    BusinessVerificationView,
+)
 
 urlpatterns = (
     [
@@ -14,6 +19,7 @@ urlpatterns = (
         path(
             "accounts/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"
         ),
+        path("accounts/logout/", TokenBlacklistView.as_view(), name="logout"),
     ]
     + [
         path("accounts/google/login/", GoogleView.as_view(), name="google_login"),
@@ -35,7 +41,9 @@ urlpatterns = (
         ),
         # 국세청_사업자등록정보 유효성검증
         path(
-            "accounts/business/verify/", BusinessVerificationView.as_view(), name="business_verification"
+            "accounts/business/verify/",
+            BusinessVerificationView.as_view(),
+            name="business_verification",
         ),
     ]
 )

@@ -56,6 +56,7 @@ api_urlpatterns = [
     path("api/", include("api.packages.urls")),
     path("api/", include("api.reservations.urls")),
     path("api/", include("api.reviews.urls")),
+    path("api/", include("api.studios.urls")),
 ]
 
 urlpatterns += api_urlpatterns

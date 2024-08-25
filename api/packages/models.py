@@ -113,25 +113,6 @@ class Package(CommonModel):
         PET = ("반려동물", "반려동물")
         BASIC_SHOOTING = ("기본촬영대행", "기본촬영대행")
 
-    class LocationChoices(models.TextChoices):
-        GYEONGGI = ("경기", "경기")
-        BUSAN = ("부산", "부산")
-        SEOUL = ("서울", "서울")
-        INCHEON = ("인천", "인천")
-        DAEGU = ("대구", "대구")
-        GWANGJU = ("광주", "광주")
-        DAEJEON = ("대전", "대전")
-        ULSAN = ("울산", "울산")
-        SEJONG = ("세종", "세종")
-        GANGWON = ("강원", "강원")
-        CHUNGBUK = ("충북", "충북")
-        CHUNGNAM = ("충남", "충남")
-        JEONBUK = ("전북", "전북")
-        JEONNAM = ("전남", "전남")
-        GYEONGBUK = ("경북", "경북")
-        GYEONGNAM = ("경남", "경남")
-        JEJU = ("제주", "제주")
-
     id = ShortUUIDField(max_length=22, primary_key=True, editable=False)
     # 패키지 카테고리
     category = models.CharField(
@@ -145,10 +126,6 @@ class Package(CommonModel):
     title = models.CharField(max_length=255)
     # 대표 이미지
     thumbnail = models.URLField()
-    # 패키지 지역
-    location = models.CharField(
-        max_length=5, choices=LocationChoices.choices, default=LocationChoices.SEOUL
-    )
     # 패키지 요약 (카드로 표시될 경우 간단히 보이는 글)
     summary = models.TextField()
     # 패키지 내용 (에디터로 작성한 글과 이미지)
