@@ -174,6 +174,7 @@ SOCIAL_CALLBACK_URI = config("SOCIAL_CALLBACK_URI", cast=str)
 APICK_SECRET = config("APICK_SECRET", cast=str)
 
 NTS_SECRET = config("NTS_SECRET", cast=str)
+
 # REST Simple JWT 설정
 
 REST_FRAMEWORK = {
@@ -194,8 +195,8 @@ from datetime import timedelta
 SIMPLE_JWT = {
     "ALGORITHM": "HS256",
     "SIGNING_KEY": SECRET_KEY,
-    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
 }
@@ -228,7 +229,6 @@ LOGGING = {
 
 
 # Channels
-
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",

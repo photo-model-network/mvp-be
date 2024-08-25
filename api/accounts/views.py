@@ -1,12 +1,15 @@
 import re
 import json
+import jwt
 import requests
 from django.conf import settings
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.core.cache import cache
 from .throttles import SendBankVerificationThrottle
 from .models import User
 
@@ -108,6 +111,7 @@ class KakaoView(APIView):
     """카카오 소셜 연동 회원가입 및 로그인"""
 
     # 사업자번호를 등록해야 이메일 필드값을 받을 수 있어 추후 연동
+    
     pass
 
 
@@ -203,15 +207,6 @@ class NaverView(APIView):
 
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-
-# class LogoutView(APIView):
-
-#     permission_classes = [IsAuthenticated]
-
-#     def post(self, request):
-#         logout(request)
-#         return Response({"message": "로그아웃 성공!"}, status=status.HTTP_200_OK)
 
 
 class SendBankVerificationView(APIView):

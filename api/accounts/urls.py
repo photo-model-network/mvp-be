@@ -17,7 +17,7 @@ urlpatterns = (
             "accounts/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"
         ),
         path(
-            "accounts/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"
+            "accounts/token/refresh/",TokenRefreshView.as_view(), name="token_refresh"
         ),
         path("accounts/logout/", TokenBlacklistView.as_view(), name="logout"),
     ]
