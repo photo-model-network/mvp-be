@@ -48,6 +48,9 @@ class User(AbstractUser):
     # 사업자 진위 여부
     is_business = models.BooleanField(default=False)
 
+    # 스튜디오 보유 여부
+    has_studio = models.BooleanField(default=False)
+
     def save(self, *args, **kwargs):
         # 아바타가 없을 경우 기본 이미지 저장
         if not self.avatar:
