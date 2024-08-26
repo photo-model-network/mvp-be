@@ -36,7 +36,7 @@ class Message(models.Model):
             models.Index(fields=["room", "timestamp"]),
         ]
 
-    def send_messsage(self):
+    def send_message(self):
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)(
             f"chat_{self.room.id}",
