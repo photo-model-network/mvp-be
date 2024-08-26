@@ -57,7 +57,16 @@ class Reservation(AbstractPayment):
             sender=self.package.provider,
             message=f'예약하신 "{self.package.title}"이 확정되었습니다.',
         )
-        message.send_messsage()
+        message.send_message()
+
+    def send_request_complete_message(self):
+        room = self.get_or_create_chatroom()
+        message = Message.objects.create(
+            room=room,
+            sender=self.customer,
+            message=f'"{self.package_title}"이 예약 신청되었습니다.</br>촬영일: {self.filming_date}</br>촬영 시작시간:{self.filming_start_time.strftime("%I:%M %p")}',
+        )
+        message.send_message()
 
     def calculate_total_price(self):
         return sum(
@@ -66,11 +75,9 @@ class Reservation(AbstractPayment):
         )
 
     def get_or_create_chatroom(self):
-        """예약시 자동으로 판매자와 구매자간의 채팅방 생성"""
+        """판매자와 구매자간의 채팅방 생성"""
         users = User.objects.filter(id__in=[self.customer.id, self.package.provider.id])
         room = ChatRoom.objects.filter(participants__in=users).distinct()
-
-        print(room)
 
         if room.count() == 1:
             return room.first()
@@ -88,10 +95,10 @@ class Reservation(AbstractPayment):
         if not self.package_title:
             self.package_title = self.package.title
 
-        # 예약 신청시 구매자와 판매자간 채팅방 생성
-        self.get_or_create_chatroom()
-
         super().save(*args, **kwargs)
+
+        # 예약 신청시 판매자에게 자동으로 예약 신청 메시지 전송
+        self.send_request_complete_message()
 
     def __str__(self):
         return f"{self.id} - {self.customer}"
