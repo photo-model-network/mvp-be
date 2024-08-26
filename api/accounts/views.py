@@ -367,7 +367,6 @@ class BusinessVerificationView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-
         business_num = request.data.get("businessNum")
 
         if not business_num:
@@ -388,9 +387,22 @@ class BusinessVerificationView(APIView):
                     }
                 ),
             )
-            return Response(response.json(), status=status.HTTP_200_OK)
+            response_data = response.json()
 
-        except requests.exceptions.RequestException as e:
+            if response.status_code == 200 and response_data.get("status_code") == "OK":
+                business_info = response_data.get("data", [])[0]
+                if business_info.get("b_stt_cd") == "01":
+                    user = request.user
+                    user.business_license_number = business_num
+                    user.is_business = True
+                    user.save()
+                    return Response({"message": "사업자 인증이 성공적으로 완료되었습니다."}, status=status.HTTP_200_OK)
+                else:
+                    return Response({"error": "유효하지 않은 사업자등록번호입니다."}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response({"error": "사업자 인증에 실패했습니다."}, status=status.HTTP_400_BAD_REQUEST)
+
+        except requests.exceptions.RequestException:
             return Response(
                 {"error": "네트워크 오류가 발생했습니다."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
