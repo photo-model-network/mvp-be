@@ -14,14 +14,16 @@ from api.packages.serializers import (
     PackageListSerializer,
     PackageDetailSerializer,
 )
+from .permissions import IsPackageProvider
 
 
 class PackageCreateView(CreateAPIView):
 
     permission_classes = [IsAuthenticated]
-
-    queryset = Package.objects.all()
     serializer_class = PackageCUDSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(provider=self.request.user)
 
 
 class PackageListView(ListAPIView):
@@ -43,7 +45,9 @@ class PackageListView(ListAPIView):
         category = self.request.query_params.get("category", None)
         filter_param = self.request.query_params.get("filter", None)
 
-        queryset = Package.objects.all()
+        queryset = Package.objects.select_related(
+            "provider", "provider_info", "policy"
+        ).prefetch_related("tags")
 
         # /packages/?user={유저아이디} 또는 {유저네임(이메일)}
         if user_id is not None:
@@ -63,30 +67,33 @@ class PackageListView(ListAPIView):
 
 
 class PackageDetailView(RetrieveAPIView):
-
-    permission_classes = [AllowAny]
     """
     package의 id 기준으로 package 조회
     """
+
+    permission_classes = [AllowAny]
+
     queryset = Package.objects.all()
     serializer_class = PackageDetailSerializer
 
 
 class PackageUpdateView(UpdateAPIView):
-
-    permission_classes = [IsAuthenticated]
     """
     package의 id 기준으로 package 수정
     """
+
+    permission_classes = [IsAuthenticated, IsPackageProvider]
+
     queryset = Package.objects.all()
     serializer_class = PackageCUDSerializer
 
 
 class PackageDeleteView(DestroyAPIView):
-
-    permission_classes = [IsAuthenticated]
     """
     package의 id 기준으로 package 삭제
     """
+
+    permission_classes = [IsAuthenticated, IsPackageProvider]
+
     queryset = Package.objects.all()
     serializer_class = PackageCUDSerializer

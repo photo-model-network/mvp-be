@@ -2,45 +2,61 @@ from api.reviews.models import Review
 from api.packages.models import Package
 from api.reviews.serializers import ReviewCRUDSerializer
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework.generics import CreateAPIView, ListAPIView, UpdateAPIView, DestroyAPIView
+from rest_framework.generics import (
+    CreateAPIView,
+    ListAPIView,
+    UpdateAPIView,
+    DestroyAPIView,
+)
+from rest_framework.exceptions import PermissionDenied
+from api.reservations.models import Reservation
+from .permissions import IsReviewAuthor
 
 
 class ReviewCreateView(CreateAPIView):
-    
     permission_classes = [IsAuthenticated]
-    queryset = Review.objects.all()
     serializer_class = ReviewCRUDSerializer
 
     def perform_create(self, serializer):
-        package = Package.objects.get(id=self.kwargs['packages_id'])
+        package = Package.objects.only("id").get(id=self.kwargs["package_id"])
+
+        has_purchased = Reservation.objects.filter(
+            package=package,
+            customer=self.request.user,
+        ).exists()
+
+        if not has_purchased:
+            raise PermissionDenied("리뷰를 달기 위해서는 패키지를 신청하셔야 합니다.")
+
         serializer.save(package=package, customer=self.request.user)
 
 
 class ReviewListView(ListAPIView):
-    
     permission_classes = [AllowAny]
     serializer_class = ReviewCRUDSerializer
 
     def get_queryset(self):
-        package_id = self.kwargs['packages_id']
-        return Review.objects.filter(package=package_id)
+        package_id = self.kwargs["package_id"]
+        return Review.objects.filter(package__id=package_id)
 
 
 class ReviewUpdateView(UpdateAPIView):
-    
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsReviewAuthor]
     serializer_class = ReviewCRUDSerializer
 
     def get_queryset(self):
-        return Review.objects.filter(customer=self.request.user, id=self.kwargs['pk'])
+        return Review.objects.filter(
+            package__id=self.kwargs["package_id"], customer=self.request.user
+        )
 
 
 class ReviewDeleteView(DestroyAPIView):
-        
-        permission_classes = [IsAuthenticated]
-        serializer_class = ReviewCRUDSerializer
+    permission_classes = [IsAuthenticated, IsReviewAuthor]
+    serializer_class = ReviewCRUDSerializer
 
-        def get_queryset(self):
-            user = self.request.user
-            queryset = Review.objects.all() if user.is_superuser else Review.objects.filter(customer=user)
-            return queryset.filter(id=self.kwargs['pk'])
+    def get_queryset(self):
+        return Review.objects.filter(
+            package__id=self.kwargs["package_id"],
+            customer=self.request.user,
+            id=self.kwargs["pk"],
+        )
