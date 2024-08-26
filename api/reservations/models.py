@@ -5,6 +5,7 @@ from api.common.models import CommonModel
 from api.packages.models import Package
 from api.accounts.models import User
 from api.payments.models import AbstractPayment
+from api.chats.models import ChatRoom, Message
 
 
 class Reservation(AbstractPayment):
@@ -16,7 +17,7 @@ class Reservation(AbstractPayment):
         DONE = ("작업완료", "작업완료")
         COMPLETE = ("구매확정", "구매확정")
 
-    id = ShortUUIDField(max_length=128, primary_key=True, editable=False)
+    id = ShortUUIDField(max_length=22, primary_key=True, editable=False)
     package = models.ForeignKey(
         Package, on_delete=models.CASCADE, related_name="reservations"
     )
@@ -47,6 +48,16 @@ class Reservation(AbstractPayment):
         """(판매자가 들어온 예약을 확인하여) 예약 확정 메소드"""
         self.status = self.ReservationStatus.CONFIRMED
         self.save()
+        self.send_confirmation_message()
+
+    def send_confirmation_message(self):
+        room = self.get_or_create_chatroom()
+        message = Message.objects.create(
+            room=room,
+            sender=self.package.provider,
+            message=f'예약하신 "{self.package.title}"이 확정되었습니다.',
+        )
+        message.send_messsage()
 
     def calculate_total_price(self):
         return sum(
@@ -54,14 +65,36 @@ class Reservation(AbstractPayment):
             for option in self.options.all()
         )
 
-    def __str__(self):
-        return f"{self.id} - {self.customer}"
+    def get_or_create_chatroom(self):
+        """예약시 자동으로 판매자와 구매자간의 채팅방 생성"""
+        users = User.objects.filter(id__in=[self.customer.id, self.package.provider.id])
+        room = ChatRoom.objects.filter(participants__in=users).distinct()
+
+        print(room)
+
+        if room.count() == 1:
+            return room.first()
+        elif room.count() > 1:
+            # 예외 처리 또는 로깅: 동일한 조건의 방이 여러 개 존재할 때
+            raise Exception("해당 참가자들에 대해 여러 개의 채팅방이 발견되었습니다.")
+        else:
+            # 채팅방을 새로 생성
+            room = ChatRoom.objects.create()
+            room.participants.add(*users)
+            room.save()
+            return room
 
     def save(self, *args, **kwargs):
         if not self.package_title:
             self.package_title = self.package.title
 
+        # 예약 신청시 구매자와 판매자간 채팅방 생성
+        self.get_or_create_chatroom()
+
         super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.id} - {self.customer}"
 
     class Meta:
         verbose_name = "예약"
@@ -93,7 +126,7 @@ class ReservationOption(CommonModel):
     # delivery_fee = models.PositiveIntegerField(default=0)
 
     def __str__(self):
-        return f"{self.reservation} - {self.name}"
+        return f"{self.reservation} : {self.name}"
 
     class Meta:
         verbose_name = "예약 당시 옵션"

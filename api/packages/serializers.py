@@ -12,7 +12,6 @@ class PackageCUDSerializer(ModelSerializer):
             "provider_info",
             "title",
             "thumbnail",
-            "region",
             "html_content",
             "policy",
             "tags",
@@ -33,7 +32,6 @@ class PackageListSerializer(ModelSerializer):
             "provider_info",
             "title",
             "thumbnail",
-            # "region",
             "summary",
         ]
 
@@ -48,7 +46,6 @@ class PackageDetailSerializer(ModelSerializer):
             "provider_info",
             "title",
             "thumbnail",
-            # "region",
             "html_content",
             "policy",
         ]

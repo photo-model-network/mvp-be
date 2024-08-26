@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebSocket Chat</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+
+    #chat-log {
+      border: 1px solid #ccc;
+      padding: 10px;
+      height: 300px;
+      overflow-y: scroll;
+      margin-bottom: 10px;
+    }
+
+    #chat-message-input {
+      width: calc(100% - 120px);
+      padding: 10px;
+      font-size: 16px;
+    }
+
+    #chat-message-submit {
+      width: 100px;
+      padding: 10px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h2>WebSocket Chat</h2>
+
+  <div id="chat-log"></div>
+  <input id="chat-message-input" type="text" placeholder="Type your message here..." />
+  <button id="chat-message-submit">Send</button>
+
+  <script>
+    const wsProtocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+    const userId = 1;  // Replace with the actual user ID
+    const otherUserId = "Q5iaPkePNeqBmA7gQSe9Ds";  // Replace with the actual other user's ID
+
+    const wsUrl = `${wsProtocol}127.0.0.1:8000/chat/${otherUserId}/?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzI0NTc0Mzc5LCJpYXQiOjE3MjQ0ODc5NzksImp0aSI6ImQ4NzAxMzVjZTYwOTQxZjQ5MTU1MmUwOTg3ZmQxNDFmIiwidXNlcl9pZCI6IlY2QlhWa2FxRmNnYkZBTWhoenBRMlcifQ.l6JWrJZIj1SmenMP5mytg3DsRZx0WNVg4OFFQjJ3FeQ`;
+
+    const chatSocket = new WebSocket(wsUrl);
+
+    let lastSender = null;
+
+    // Load messages from localStorage on page load
+    function loadMessages() {
+      const chatLog = document.getElementById('chat-log');
+      const storedMessages = JSON.parse(localStorage.getItem('chatMessages')) || [];
+
+      storedMessages.forEach(data => {
+        appendMessageToChatLog(data.sender, data.message);
+      });
+
+      chatLog.scrollTop = chatLog.scrollHeight;
+    }
+
+    // Save messages to localStorage
+    function saveMessage(sender, message) {
+      const storedMessages = JSON.parse(localStorage.getItem('chatMessages')) || [];
+      storedMessages.push({ sender, message });
+      localStorage.setItem('chatMessages', JSON.stringify(storedMessages));
+    }
+
+    // Append message to the chat log
+    function appendMessageToChatLog(sender, message) {
+      const chatLog = document.getElementById('chat-log');
+      const senderLabel = sender == userId ? "You" : `User ${sender}`;
+
+      // Check if the last sender is the same as the current one to avoid repetition
+      if (lastSender !== sender) {
+        chatLog.innerHTML += `<div><strong>${senderLabel}:</strong></div>`;
+        lastSender = sender;
+      }
+
+      // Append the message with HTML rendering
+      chatLog.innerHTML += `<div style="margin-left: 20px;">${message}</div>`;
+      chatLog.scrollTop = chatLog.scrollHeight;
+    }
+
+    // Load previous messages when the page is loaded
+    loadMessages();
+
+    chatSocket.onmessage = function (e) {
+      const data = JSON.parse(e.data);
+      const message = data.message;
+      const sender = data.sender;
+
+      // Append and save the incoming message
+      appendMessageToChatLog(sender, message);
+      saveMessage(sender, message);
+    };
+
+    chatSocket.onclose = function (e) {
+      console.error('Chat socket closed unexpectedly');
+    };
+
+    // Function to send a message
+    function sendMessage() {
+      const messageInputDom = document.getElementById('chat-message-input');
+      const message = messageInputDom.value;
+
+      if (message.trim()) {
+        chatSocket.send(JSON.stringify({
+          'message': message,
+          'sender': userId  // Include the sender ID in the message
+        }));
+
+        // Append and save the outgoing message
+        appendMessageToChatLog(userId, message);
+        saveMessage(userId, message);
+
+        messageInputDom.value = '';
+      }
+    }
+
+    // Bind the sendMessage function to the click event of the button
+    document.getElementById('chat-message-submit').onclick = sendMessage;
+
+    // Bind the sendMessage function to the Enter key press
+    document.getElementById('chat-message-input').onkeyup = function (e) {
+      if (e.keyCode === 13) {  // Enter key
+        sendMessage();
+      }
+    };
+  </script>
+
+</body>
+
+</html>

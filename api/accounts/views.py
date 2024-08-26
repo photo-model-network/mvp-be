@@ -1,15 +1,13 @@
 import re
 import json
-import jwt
 import requests
 from django.conf import settings
+from django.contrib.auth.hashers import make_password
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework_simplejwt.tokens import RefreshToken
-from django.core.cache import cache
 from .throttles import SendBankVerificationThrottle
 from .models import User
 
@@ -111,7 +109,7 @@ class KakaoView(APIView):
     """카카오 소셜 연동 회원가입 및 로그인"""
 
     # 사업자번호를 등록해야 이메일 필드값을 받을 수 있어 추후 연동
-    
+
     pass
 
 
@@ -119,7 +117,7 @@ class NaverView(APIView):
     """네이버 소셜 연동 회원가입 및 로그인"""
 
     permission_classes = [AllowAny]
-    
+
     def post(self, request):
 
         code = request.data.get("code")
@@ -207,6 +205,47 @@ class NaverView(APIView):
 
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+# class RegisterView(APIView):
+#     def post(self, request):
+
+#         username = request.data.get("username")
+#         password = request.data.get("password")
+#         name = request.data.get("name")
+
+#         if not username or not password or not name:
+#             return Response(
+#                 {"error": "모든 필드를 입력해야 합니다."},
+#                 status=status.HTTP_400_BAD_REQUEST,
+#             )
+
+#         # 중복 사용자명 확인
+#         if User.objects.filter(username=username).exists():
+#             return Response(
+#                 {"error": "이미 사용중인 아이디입니다."},
+#                 status=status.HTTP_400_BAD_REQUEST,
+#             )
+
+#         try:
+
+#             user = User.objects.create(
+#                 username=username,
+#                 email=username,
+#                 name=name,
+#                 password=make_password(password),
+#             )
+
+#             user.save()
+
+#             return Response(
+#                 {"message": "회원가입이 성공적으로 완료되었습니다."},
+#                 status=status.HTTP_201_CREATED,
+#             )
+#         except Exception as e:
+#             return Response(
+#                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+#             )
 
 
 class SendBankVerificationView(APIView):
@@ -323,31 +362,41 @@ class ConfirmBankVerificationView(APIView):
             )
 
 
-class BusinessVerificationView(APIView): 
+class BusinessVerificationView(APIView):
 
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
 
-        business_num = request.data.get('businessNum')
+        business_num = request.data.get("businessNum")
 
-        if not business_num :
-            return Response({"error": "10자리 사업자등록번호를 "-"없이 입력해주세요."}, status=status.HTTP_400_BAD_REQUEST)
+        if not business_num:
+            return Response(
+                {"error": '사업자등록번호를 10자리를  " - " 없이 입력해주세요.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         try:
             response = requests.post(
                 f"https://api.odcloud.kr/api/nts-businessman/v1/status?serviceKey={settings.NTS_SECRET}",
                 headers={
-                "Content-Type": "application/json",
-                    },                  
-                data=json.dumps({           # json.dumps()를 사용하여 dict를 json으로 변환 > 오류방지
-                    "b_no": [business_num],
-                }),
-        )
+                    "Content-Type": "application/json",
+                },
+                data=json.dumps(
+                    {
+                        "b_no": [business_num],
+                    }
+                ),
+            )
             return Response(response.json(), status=status.HTTP_200_OK)
-        
+
         except requests.exceptions.RequestException as e:
             return Response(
-                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )   
-        
+                {"error": "네트워크 오류가 발생했습니다."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )

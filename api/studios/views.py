@@ -4,26 +4,6 @@ from .serializers import StudioCRUDSerializer
 from .pagination import StudioPagination
 from .models import Studio
 
-# class NearbyStudioView(APIView):
-
-#     permission_classes = [AllowAny]
-
-#     def get(self, request):
-#         user_latitude = float(request.query_params.get("lat"))
-#         user_longitude = float(request.query_params.get("lng"))
-#         radius_km = float(request.query_params.get("radius", 10))
-#         region = request.query_params.get("region", None)
-
-#         nearby_studios = Studio.get_nearby_studios(
-#             user_latitude, user_longitude, radius_km, region
-#         )
-
-#         paginator = StudioPagination()
-#         paginated_studios = paginator.paginate_queryset(nearby_studios, request)
-#         serializer = StudioCRUDSerializer(paginated_studios, many=True)
-
-#         return paginator.get_paginated_response(serializer.data)
-
 
 class StudioListView(ListAPIView):
     permission_classes = [IsAuthenticated]

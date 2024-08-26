@@ -47,9 +47,9 @@ class Studio(CommonModel):
     # 유저와 스튜디오와의 거리 계산
     def distance_to(self, user_latitude, user_longitude):
         if self.latitude is not None and self.longitude is not None:
-            studio_location = (self.latitude, self.longitude)
-            user_location = (user_latitude, user_longitude)
-            return haversine(studio_location, user_location, unit=Unit.KILOMETERS)
+            studio_coordinate = (self.latitude, self.longitude)
+            user_coordinate = (user_latitude, user_longitude)
+            return haversine(studio_coordinate, user_coordinate, unit=Unit.KILOMETERS)
         return None
 
     @staticmethod

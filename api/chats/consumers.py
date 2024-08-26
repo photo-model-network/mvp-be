@@ -14,14 +14,19 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def connect(self):
         self.user = self.scope["user"]
+        self.other_user = self.scope["url_route"]["kwargs"]["uid"]
 
         if not self.user.is_authenticated:
             await self.close()
             return
 
-        self.other_user = self.scope["url_route"]["kwargs"]["uid"]
+        try:
+            other_user = await self.get_user(self.other_user)
+        except User.DoesNotExist:
+            await self.close()
+            return
 
-        self.room = await self.get_or_create_chatroom(self.user.id, self.other_user)
+        self.room = await self.get_or_create_chatroom(self.user.id, other_user.id)
         self.room_group_name = f"chat_{self.room.id}"
 
         await self.channel_layer.group_add(
@@ -66,10 +71,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
         )
 
     @database_sync_to_async
+    def get_user(self, uid):
+        return User.objects.get(id=uid)
+
+    @database_sync_to_async
     def get_or_create_chatroom(self, uid1, uid2):
-        # 두 사용자를 이용해 채팅방을 생성하거나 가져옵니다.
+
         users = User.objects.filter(id__in=[uid1, uid2])
-        # 두 사용자가 모두 포함된 방을 필터링
         room = ChatRoom.objects.filter(participants__in=users).distinct()
 
         if room.count() == 1:
