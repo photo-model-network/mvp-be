@@ -33,7 +33,6 @@ class TimeSlotTestCase(TestCase):
             provider_info=self.provider_info,
             title="Test Package",
             thumbnail="http://example.com/thumbnail.jpg",
-            location=Package.LocationChoices.SEOUL,
             summary="Test Summary",
             html_content="<p>Test Content</p>",
             policy=self.policy,

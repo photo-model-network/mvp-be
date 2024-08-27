@@ -27,7 +27,12 @@ SECRET_KEY = config("DJANGO_SECRET", cast=str)
 DEBUG = config("DEBUG", cast=bool)
 
 ALLOWED_HOSTS = ["*"]
-CORS_ALLOW_ALL_ORIGINS = True  # 개발 시에만
+# CORS_ALLOW_ALL_ORIGINS = True  # 개발 시에만
+CORS_ALLOWED_ORIGINS = [
+    "http://127.0.0.1:5173",
+    "http://localhost:5173",
+]
+
 
 APPEND_SLASH = True
 # Application definition
@@ -169,7 +174,8 @@ GOOGLE_CLIENT = config("GOOGLE_CLIENT", cast=str)
 GOOGLE_SECRET = config("GOOGLE_SECRET", cast=str)
 SOCIAL_CALLBACK_URI = config("SOCIAL_CALLBACK_URI", cast=str)
 
-# PORTONE_SECRET = config("PORTONE_SECRET", cast=str)
+PORTONE_SECRET = config("PORTONE_SECRET", cast=str)
+PORTONE_WEBHOOK = config("PORTONE_WEBHOOK", cast=str)
 
 APICK_SECRET = config("APICK_SECRET", cast=str)
 

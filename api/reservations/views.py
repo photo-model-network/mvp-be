@@ -153,45 +153,139 @@ class ConfirmReservationView(APIView):
             )
 
 
-# class PayReservationView(APIView):
-#     """구매자가 확정된 예약을 결제(검증)"""
+class PayReservationView(APIView):
+    """구매자가 확정된 예약을 결제(검증)"""
 
-#     permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
-#     def post(self, request):
-#         try:
-#             payment_id = request.data.get("paymentId")
-#             reservation_id = request.data.get("reservationId")
-#             # 해당 paymentId로 결제 정보 조회
-#             response = requests.get(
-#                 f"https://api.portone.io/payments/{payment_id}",
-#                 headers={"Authorization": f"PortOne {settings.PORTONE_SECRET}"},
-#             )
+    # def post(self, request):
+    #     try:
+    #         payment_id = request.data.get("paymentId")
+    #         reservation_id = request.data.get("reservationId")
 
-#             if response.status_code == 200:
-#                 response_data = response.json()
+    #         if not payment_id or not reservation_id:
+    #             return Response(
+    #                 {"error": "paymentId와 reservationId는 필수 항목입니다."},
+    #                 status=status.HTTP_400_BAD_REQUEST,
+    #             )
 
-#                 # 해당 예약이 본인의 예약이 맞는지 검증
-#                 reservation = get_object_or_404(
-#                     Reservation, id=reservation_id, customer=request.user
-#                 )
+    #         # 해당 paymentId로 결제 정보 조회
+    #         try:
+    #             response = requests.get(
+    #                 f"https://api.portone.io/payments/{payment_id}",
+    #                 headers={"Authorization": f"PortOne {settings.PORTONE_SECRET}"},
+    #             )
+    #         except requests.exceptions.RequestException as e:
+    #             return Response(
+    #                 {"error": str(e)},
+    #                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+    #             )
 
-#                 if reservation.status == reservation.StatusChoices.ESCROW_HOLD:
-#                     return Response(
-#                         {"message": "해당 예약 건은 이미 배송등록 단계입니다."},
-#                     )
+    #         response_data = response.json()
+    #         # 해당 예약이 본인의 예약이 맞는지 검증
+    #         reservation = get_object_or_404(
+    #             Reservation, id=reservation_id, customer=request.user
+    #         )
 
-#                 selected_options = reservation.options.all()
+    #         # 결제 금액 검증
+    #         if reservation.calculate_total_price() != response_data["amount"]["total"]:
+    #             return Response(
+    #                 {"error": "결제 금액이 불일치하여 위/변조 시도가 의심됩니다."},
+    #                 status=status.HTTP_400_BAD_REQUEST,
+    #             )
 
-#                 selected_options = reservation.options.all()
-#                 print(selected_options)
+    #         # 예약 상태와 결제 상태 검증
+    #         if reservation.status != reservation.ReservationStatus.CONFIRMED:
+    #             return Response(
+    #                 {"error": "예약이 확정되지 않았습니다."},
+    #                 status=status.HTTP_400_BAD_REQUEST,
+    #             )
 
-#             else:
-#                 return Response(
-#                     {"message": "결제 검증 실패", "code": status.HTTP_400_BAD_REQUEST}
-#                 )
+    #         if reservation.payment_status != reservation.PaymentStatus.PENDING:
+    #             return Response(
+    #                 {"error": "결제 상태가 '대기중'이 아닙니다."},
+    #                 status=status.HTTP_400_BAD_REQUEST,
+    #             )
 
-#         except requests.exceptions.RequestException as e:
-#             return Response(
-#                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
-#             )
+    #         # 결제 상태 업데이트 및 저장
+    #         reservation.payment_status = reservation.PaymentStatus.SHIPPING_REGISTERED
+    #         reservation.payment_id = payment_id
+    #         reservation.save()
+
+    #         return Response(
+    #             {"message": "결제가 성공적으로 처리되었습니다."},
+    #             status=status.HTTP_200_OK,
+    #         )
+
+    #     except Exception as e:
+    #         return Response(
+    #             {"error": str(e)},
+    #             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+    #         )
+    def post(self, request):
+        try:
+            payment_id = request.data.get("paymentId")
+            # reservation_id = request.data.get("reservationId")
+
+            if not payment_id:
+                return Response(
+                    {"error": "paymentId는 필수 항목입니다."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            logger.debug(f"예약 결제 payment_id: {payment_id}")
+            # logger.debug(f"예약 결제 reservation_id: {reservation_id}")
+
+            # 결제 정보 조회 시도
+            try:
+                response = requests.get(
+                    f"https://api.portone.io/payments/{payment_id}",
+                    headers={"Authorization": f"PortOne {settings.PORTONE_SECRET}"},
+                )
+
+            except requests.exceptions.RequestException:
+                # 네트워크 문제가 발생한 경우 웹훅에서 상태를 처리하도록 안내
+                return Response(
+                    {
+                        "message": "네트워크 오류로 인해 결제 상태를 확인할 수 없습니다. 결제 완료 후 상태가 자동으로 업데이트됩니다.",
+                    },
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                )
+
+            response_data = response.json()
+            reservation = get_object_or_404(
+                Reservation, payment_id=payment_id, customer=request.user
+            )
+
+            if reservation.calculate_total_price() != response_data["amount"]["total"]:
+                return Response(
+                    {"error": "결제 금액이 일치하지 않습니다."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            if reservation.status != reservation.ReservationStatus.CONFIRMED:
+                return Response(
+                    {"error": "예약이 확정되지 않았습니다."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            if reservation.payment_status != reservation.PaymentStatus.PENDING:
+                return Response(
+                    {"error": "결제 상태가 '대기중'이 아닙니다."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            reservation.payment_status = reservation.PaymentStatus.SHIPPING_REGISTERED
+            # reservation.payment_id = payment_id
+            reservation.save()
+
+            return Response(
+                {"message": "결제가 성공적으로 처리되었습니다."},
+                status=status.HTTP_200_OK,
+            )
+
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
