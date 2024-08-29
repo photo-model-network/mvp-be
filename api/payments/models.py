@@ -1,7 +1,6 @@
 import uuid
 from django.db import models
 from api.common.models import CommonModel
-from shortuuid.django_fields import ShortUUIDField
 
 
 class AbstractPayment(CommonModel):
@@ -29,7 +28,9 @@ class AbstractPayment(CommonModel):
         CANCELED = ("결제취소", "결제취소")
 
     # 고유 결제 ID
-    payment_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    payment_id = models.CharField(
+        max_length=128, default=uuid.uuid4, editable=False, unique=True
+    )
     # 결제 금액
     payment_amount = models.PositiveIntegerField(default=0)
     # 결제일
