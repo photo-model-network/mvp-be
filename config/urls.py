@@ -55,6 +55,7 @@ api_urlpatterns = [
     path("api/", include("api.accounts.urls")),
     path("api/", include("api.packages.urls")),
     path("api/", include("api.reservations.urls")),
+    path("api/", include("api.payments.urls")),
     path("api/", include("api.reviews.urls")),
     path("api/", include("api.studios.urls")),
 ]

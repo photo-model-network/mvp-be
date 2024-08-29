@@ -10,6 +10,7 @@ class ReservationOptionInline(admin.TabularInline):
 @admin.register(Reservation)
 class ReservationAdmin(admin.ModelAdmin):
     list_display = [
+        "payment_id",
         "id",
         "customer",
         "status",

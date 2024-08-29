@@ -45,7 +45,7 @@ class User(AbstractUser):
 
     # 사업자 등록 번호
     business_license_number = models.CharField(max_length=30, blank=True, null=True)
-    # 사업자 진위 여부
+    # 사업자 여부
     is_business = models.BooleanField(default=False)
 
     # 스튜디오 보유 여부

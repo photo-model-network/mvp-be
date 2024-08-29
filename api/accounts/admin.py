@@ -66,3 +66,17 @@ class CustomUserAdmin(UserAdmin):
     )
 
     list_display = ["username", "is_approved", "type", "real_name"]
+
+    actions = ["make_business", "remove_business"]
+
+    # 선택된 사용자들을 사업자로 변경하는 액션
+    def make_business(self, request, queryset):
+        queryset.update(is_business=True)
+
+    make_business.short_description = "선택된 사용자들을 사업자로 설정"
+
+    # 선택된 사용자들의 사업자 여부를 해제하는 액션
+    def remove_business(self, request, queryset):
+        queryset.update(is_business=False)
+
+    remove_business.short_description = "선택된 사용자들의 사업자 여부 해제"

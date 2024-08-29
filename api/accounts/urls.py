@@ -27,7 +27,7 @@ urlpatterns = (
         path("accounts/kakao/login/", KakaoView.as_view(), name="kakao_login"),
     ]
     + [
-        # 1원 전송 및 인증 코드 저장
+        # 계좌로 1원 전송 및 인증 코드 저장
         path(
             "accounts/bank/verification/send/",
             SendBankVerificationView.as_view(),

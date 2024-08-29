@@ -249,6 +249,7 @@ class NaverView(APIView):
 
 
 class SendBankVerificationView(APIView):
+    """계좌로 1원 전송 및 인증 코드 저장"""
 
     permission_classes = [IsAuthenticated]
     throttle_classes = [SendBankVerificationThrottle]
@@ -321,6 +322,7 @@ class SendBankVerificationView(APIView):
 
 
 class ConfirmBankVerificationView(APIView):
+    """계좌로 전송된 인증 코드 일치 여부 확인"""
 
     permission_classes = [IsAuthenticated]
 
@@ -363,6 +365,7 @@ class ConfirmBankVerificationView(APIView):
 
 
 class BusinessVerificationView(APIView):
+    """국세청_사업자등록정보 유효성검증"""
 
     permission_classes = [IsAuthenticated]
 

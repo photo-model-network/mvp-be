@@ -3,6 +3,7 @@
 .env
 /staticfiles
 dump.rdb
+portone.py
 
 ### Django ###
 *.log
