@@ -33,7 +33,7 @@ def get_available_times(package, check_date):
         # 해당 시간대가 예약 불가 시간에 포함되지 않는지 확인
         if not UnavailableTimeSlot.objects.filter(
             package=package,
-            start_dateime__lte=current_time,
+            start_datetime__lte=current_time,
             end_datetime__gt=current_time,
         ).exists():
             available_times.append(current_time.time())
