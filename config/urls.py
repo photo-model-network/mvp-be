@@ -58,6 +58,7 @@ api_urlpatterns = [
     path("api/", include("api.payments.urls")),
     path("api/", include("api.reviews.urls")),
     path("api/", include("api.studios.urls")),
+    path("api/", include("api.core.urls")),
 ]
 
 urlpatterns += api_urlpatterns
