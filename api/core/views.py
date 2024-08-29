@@ -2,6 +2,7 @@ from django.db.models import Q
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework import status
 from api.packages.models import Package
 from api.studios.models import Studio
 
@@ -12,7 +13,7 @@ class CoreSearchView(APIView):
         # core/search/?q={검색어}
         query = request.GET.get('q', '')
         if not query:
-            return Response({"results": "검색어를 입력해주세요."})
+            return Response({"results": "검색어를 입력해주세요."}, status=status.HTTP_400_BAD_REQUEST)
 
         package_results = Package.objects.filter(
             Q(title__icontains=query) |
@@ -31,4 +32,4 @@ class CoreSearchView(APIView):
             "studios": list(studio_results.values('name', 'juso', 'owner__username')),
         }
 
-        return Response({"results": results})
+        return Response({"results": results}, status=status.HTTP_200_OK)

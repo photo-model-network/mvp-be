@@ -397,7 +397,6 @@ class BusinessVerificationView(APIView):
                 if business_info.get("b_stt_cd") == "01":
                     user = request.user
                     user.business_license_number = business_num
-                    user.is_business = True
                     user.save()
                     return Response({"message": "사업자 인증이 성공적으로 완료되었습니다."}, status=status.HTTP_200_OK)
                 else:
