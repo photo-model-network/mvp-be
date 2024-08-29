@@ -18,13 +18,13 @@ class CoreSearchView(APIView):
             Q(title__icontains=query) |
             Q(summary__icontains=query) |
             Q(provider__username__icontains=query)
-        ).select_related('provider')
+        ).select_related('provider')[:10]
 
         studio_results = Studio.objects.filter(
             Q(name__icontains=query) |
             Q(juso__icontains=query) |
             Q(owner__username__icontains=query)
-        ).select_related('owner')
+        ).select_related('owner')[:10]
 
         results = {
             "packages": list(package_results.values('title', 'summary', 'provider__username')),
