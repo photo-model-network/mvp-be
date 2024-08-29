@@ -10,7 +10,8 @@ class PackagePicture(CommonModel):
     """촬영 패키지 소개 이미지 (여러장)"""
 
     package = models.ForeignKey("Package", on_delete=models.CASCADE)
-    image = models.URLField()
+    original_url = models.URLField()
+    store_url = models.URLField()
 
     class Meta:
         verbose_name = "패키지 소개 이미지"
