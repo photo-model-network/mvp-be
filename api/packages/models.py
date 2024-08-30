@@ -141,3 +141,5 @@ class Package(CommonModel):
     class Meta:
         verbose_name = "패키지"
         verbose_name_plural = "패키지"
+
+        ordering = ["-created_at"]
