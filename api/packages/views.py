@@ -23,7 +23,7 @@ class PackageCreateView(CreateAPIView):
     serializer_class = PackageCUDSerializer
 
     def perform_create(self, serializer):            
-        serializer.save(provider=self.request.user)
+        serializer.save()
 
 
 class PackageListView(ListAPIView):

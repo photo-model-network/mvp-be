@@ -32,8 +32,12 @@ class PackageCUDSerializer(ModelSerializer):
     def create(self, validated_data):
         validated_data['provider'] = self.context.get('request').user
         images = validated_data.pop('images', None)
+        thumbnail = validated_data.pop('thumbnail', None)
+        
         package = super().create(validated_data)
-        save_images(images, package)
+        
+        save_thumbnail(thumbnail, package)
+        save_package_images(images, package)
         return package
 
 
@@ -71,8 +75,7 @@ class PackageDetailSerializer(ModelSerializer):
         ]
 
 
-
-def save_images(images, package):
+def save_package_images(images, package):
     if images:
         for image in images:
             original_filename = image.name
@@ -84,3 +87,13 @@ def save_images(images, package):
                 original_url = original_filename,
                 store_url = unique_filename
             )
+            
+def save_thumbnail(thumbnail, package):
+    if thumbnail:
+        original_filename = thumbnail.name
+        ext = os.path.splitext(thumbnail.name)[1]
+        unique_filename = f"{uuid.uuid4()}{ext}"  # 파일명 중복 방지를 위한 유니크한 파일명 생성
+        default_storage.save(unique_filename, thumbnail)  # 파일 저장
+        package.thumbnail = original_filename
+        package.thumbnail_store_url = unique_filename
+        package.save()
