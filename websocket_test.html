@@ -45,9 +45,9 @@
   <script>
     const wsProtocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
     const userId = 1;  // Replace with the actual user ID
-    const otherUserId = "Q5iaPkePNeqBmA7gQSe9Ds";  // Replace with the actual other user's ID
+    const otherUserId = "jjBLaF8BHSAVWWJ9km23Xh";  // Replace with the actual other user's ID
 
-    const wsUrl = `${wsProtocol}127.0.0.1:8000/chat/${otherUserId}/?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzI0NzI4NTU3LCJpYXQiOjE3MjQ2NDIxNTcsImp0aSI6IjJjYjhjZmU1NTU3MzQ4YTZhZDhhYTBkZTRlMjM4NjI5IiwidXNlcl9pZCI6IlY2QlhWa2FxRmNnYkZBTWhoenBRMlcifQ.w1c6wpuhseetou_FqEPopoKoD-n76S2OTsZHtfbnjrg`;
+    const wsUrl = `${wsProtocol}127.0.0.1:8000/chat/${otherUserId}/?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzI1MDA5NTE5LCJpYXQiOjE3MjQ5MjMxMTksImp0aSI6IjE1NjU5MjY1YTczYzQ1ZjZhOWY1MWFmYzZkOTdjODMyIiwidXNlcl9pZCI6IlFSaFlqbzI5QllnR0NaSGZtR2FKSngifQ.zoH0UQOg6MBhdmG7CTWZuHbWWhawRbg8OlzBL5mmAD8`;
 
     const chatSocket = new WebSocket(wsUrl);
 
