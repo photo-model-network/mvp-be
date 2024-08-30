@@ -22,7 +22,7 @@ class PackageCreateView(CreateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = PackageCUDSerializer
 
-    def perform_create(self, serializer):
+    def perform_create(self, serializer):            
         serializer.save(provider=self.request.user)
 
 
