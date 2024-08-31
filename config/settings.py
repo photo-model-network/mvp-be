@@ -32,6 +32,9 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "https://mvp-be-production.up.railway.app",
 ]
+CSRF_TRUSTED_ORIGINS = [
+    "https://mvp-be-production.up.railway.app",
+]
 
 X_FRAME_OPTIONS = "DENY"
 
