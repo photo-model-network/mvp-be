@@ -27,12 +27,13 @@ SECRET_KEY = config("DJANGO_SECRET", cast=str)
 DEBUG = config("DEBUG", cast=bool)
 
 ALLOWED_HOSTS = ["*"]
-# CORS_ALLOW_ALL_ORIGINS = True  # 개발 시에만
 CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5173",
     "http://localhost:5173",
+    "https://mvp-be-production.up.railway.app",
 ]
 
+X_FRAME_OPTIONS = "DENY"
 
 APPEND_SLASH = True
 # Application definition
