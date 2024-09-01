@@ -1,6 +1,5 @@
 from django.db import models
 from haversine import haversine, Unit
-from shortuuid.django_fields import ShortUUIDField
 from api.common.models import CommonModel
 from api.accounts.models import User
 
@@ -26,7 +25,7 @@ class Studio(CommonModel):
         GYEONGNAM = ("경남", "경남")
         JEJU = ("제주", "제주")
 
-    id = ShortUUIDField(max_length=22, primary_key=True, editable=False)
+    id = models.CharField(max_length=22, primary_key=True, editable=False)
     # 관리자
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     # 스튜디오 이름
