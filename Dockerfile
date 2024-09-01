@@ -1,6 +1,14 @@
 # Python 3.10.14 이미지를 사용
 FROM python:3.10.14
 
+# 빌드 시간에 사용할 환경 변수를 선언
+ARG NEW_RELIC_API_KEY
+ARG NEW_RELIC_ACCOUNT_ID
+
+# 환경 변수를 ENV로 설정하여 모든 RUN, CMD, ENTRYPOINT에서 사용 가능하게 만듦
+ENV NEW_RELIC_API_KEY=${NEW_RELIC_API_KEY}
+ENV NEW_RELIC_ACCOUNT_ID=${NEW_RELIC_ACCOUNT_ID}
+
 # 작업 디렉토리 설정
 WORKDIR /app
 
