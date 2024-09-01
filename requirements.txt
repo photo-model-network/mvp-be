@@ -40,7 +40,6 @@ incremental==24.7.2
 inflection==0.5.1
 jmespath==1.0.1
 msgpack==1.0.8
-mysqlclient==2.2.4
 opentelemetry-api==1.27.0
 packaging==24.1
 pillow==10.4.0
