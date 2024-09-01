@@ -36,7 +36,6 @@ incremental==24.7.2
 inflection==0.5.1
 jmespath==1.0.1
 msgpack==1.0.8
-newrelic==9.13.0
 packaging==24.1
 pillow==10.4.0
 psycopg2-binary==2.9.9
