@@ -12,8 +12,8 @@ ENV NEW_RELIC_ACCOUNT_ID=${NEW_RELIC_ACCOUNT_ID}
 # 작업 디렉토리 설정
 WORKDIR /app
 
-# sudo 설치
-RUN apt-get update && apt-get install -y sudo
+# sudo 및 curl 설치
+RUN apt-get update && apt-get install -y sudo curl
 
 # 필요한 패키지 설치
 COPY requirements.txt /app/
