@@ -299,8 +299,6 @@ if ENV == "production":
     ddtrace.config.version = config("DD_VERSION")
     ddtrace.config.site = config("DD_SITE")
     ddtrace.config.agent_hostname = config("DD_AGENT_HOST")
-
+    ddtrace.config.agent_port = 8126
     # 모든 필요한 패치 적용 (Django, 데이터베이스, etc.)
     patch_all()
-    # Datadog API key를 환경 변수에서 가져오기
-    DATADOG_API_KEY = config("DD_SECRET")
