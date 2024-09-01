@@ -19,8 +19,9 @@ RUN apt-get update && apt-get install -y sudo curl
 COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
 
-# New Relic CLI 설치 및 설정 (sudo 사용)
+# New Relic CLI 설치 및 프로파일 설정 후 로그 통합 설치
 RUN curl -Ls https://download.newrelic.com/install/newrelic-cli/scripts/install.sh | bash \
+    && echo "Y" | sudo NEW_RELIC_API_KEY=${NEW_RELIC_API_KEY} newrelic profile configure --api-key=${NEW_RELIC_API_KEY} --account-id=${NEW_RELIC_ACCOUNT_ID} \
     && sudo /usr/local/bin/newrelic install -n logs-integration
 
 # 애플리케이션 소스 복사
