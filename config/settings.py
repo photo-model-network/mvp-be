@@ -304,3 +304,19 @@ LOGGING = {
 #             "CONFIG": {"hosts": config("REDIS_URL", cast=str)},
 #         },
 #     }
+
+import ddtrace
+from ddtrace import patch_all
+
+if ENV == "production":
+
+    # Datadog 설정
+    ddtrace.config.env = config("DD_ENV")
+    ddtrace.config.service = config("DD_SERVICE")
+    ddtrace.config.version = config("DD_VERSION")
+    ddtrace.config.site = config("DD_SITE")
+
+    # 모든 필요한 패치 적용 (Django, 데이터베이스, etc.)
+    patch_all()
+    # Datadog API key를 환경 변수에서 가져오기
+    DATADOG_API_KEY = config("DD_SECRET")
