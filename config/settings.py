@@ -298,6 +298,7 @@ if ENV == "production":
     ddtrace.config.service = config("DD_SERVICE")
     ddtrace.config.version = config("DD_VERSION")
     ddtrace.config.site = config("DD_SITE")
+    ddtrace.config.agent_hostname = config("DD_AGENT_HOST")
 
     # 모든 필요한 패치 적용 (Django, 데이터베이스, etc.)
     patch_all()
