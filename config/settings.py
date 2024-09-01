@@ -47,6 +47,7 @@ APPEND_SLASH = True
 
 INSTALLED_APPS = [
     "daphne",
+    "ddtrace.contrib.django",
     "rest_framework",
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
@@ -288,17 +289,18 @@ LOGGING = {
     },
 }
 
-import ddtrace
-from ddtrace import patch_all
+# import ddtrace
+# from ddtrace import patch_all, config
 
-if ENV == "production":
+# if ENV == "production":
 
-    # Datadog 설정
-    ddtrace.config.env = config("DD_ENV")
-    ddtrace.config.service = config("DD_SERVICE")
-    ddtrace.config.version = config("DD_VERSION")
-    ddtrace.config.site = config("DD_SITE")
-    ddtrace.config.agent_hostname = "photo-model-network"
-    ddtrace.config.agent_port = 8126
-    # 모든 필요한 패치 적용 (Django, 데이터베이스, etc.)
-    patch_all()
+#     # Datadog 설정
+#     ddtrace.config.env = config("DD_ENV")
+#     ddtrace.config.service = config("DD_SERVICE")
+#     ddtrace.config.version = config("DD_VERSION")
+#     ddtrace.config.site = config("DD_SITE")
+#     ddtrace.config.agent_hostname = "photo-model-network"
+#     ddtrace.config.agent_port = 8126
+#     config.age
+#     # 모든 필요한 패치 적용 (Django, 데이터베이스, etc.)
+#     patch_all()
