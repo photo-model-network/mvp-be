@@ -15,6 +15,7 @@ from decouple import config
 from pytz import timezone
 import dj_database_url
 
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -79,7 +80,6 @@ INSTALLED_APPS += CUSTOM_APPS
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -130,6 +130,7 @@ CHANNEL_LAYERS = {
 }
 
 if ENV == "production":
+
     DATABASES["default"] = dj_database_url.parse(config("DATABASE_URL"))
 
     CHANNEL_LAYERS = {
@@ -287,20 +288,19 @@ LOGGING = {
     },
 }
 
+# 데이터독 설정
+# import ddtrace
+# from ddtrace import patch_all
 
-# if ENV == "development":
-#     CHANNEL_LAYERS = {
-#         "default": {
-#             "BACKEND": "channels_redis.core.RedisChannelLayer",
-#             "CONFIG": {
-#                 "hosts": [("127.0.0.1", 6379)],
-#             },
-#         },
-#     }
-# elif ENV == "production":
-#     CHANNEL_LAYERS = {
-#         "default": {
-#             "BACKEND": "channels_redis.core.RedisChannelLayer",
-#             "CONFIG": {"hosts": config("REDIS_URL", cast=str)},
-#         },
-#     }
+# if ENV == "production":
+
+#     # Datadog 설정
+#     ddtrace.config.env = config("DD_ENV")
+#     ddtrace.config.service = config("DD_SERVICE")
+#     ddtrace.config.version = config("DD_VERSION")
+#     ddtrace.config.site = config("DD_SITE")
+
+#     # 모든 필요한 패치 적용 (Django, 데이터베이스, etc.)
+#     patch_all()
+#     # Datadog API key를 환경 변수에서 가져오기
+#     DATADOG_API_KEY = config("DD_SECRET")
