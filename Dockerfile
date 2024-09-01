@@ -21,8 +21,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # New Relic CLI 설치 및 설정 (sudo 사용)
 RUN curl -Ls https://download.newrelic.com/install/newrelic-cli/scripts/install.sh | bash \
-    && sudo NEW_RELIC_API_KEY=${NEW_RELIC_API_KEY} \
-    && sudo NEW_RELIC_ACCOUNT_ID=${NEW_RELIC_ACCOUNT_ID} \
     && sudo /usr/local/bin/newrelic install -n logs-integration
 
 # 애플리케이션 소스 복사
