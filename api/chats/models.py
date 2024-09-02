@@ -1,3 +1,4 @@
+import shortuuid
 from django.db import models
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
@@ -6,7 +7,9 @@ from api.accounts.models import User
 
 
 class ChatRoom(CommonModel):
-    id = models.CharField(max_length=22, primary_key=True, editable=False)
+    id = models.CharField(
+        max_length=22, default=shortuuid.uuid, primary_key=True, editable=False
+    )
     participants = models.ManyToManyField(User, related_name="chatrooms")
 
     def __str__(self):
