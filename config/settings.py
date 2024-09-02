@@ -13,7 +13,6 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 from decouple import config
 from pytz import timezone
-import dj_database_url
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -47,7 +46,6 @@ APPEND_SLASH = True
 
 INSTALLED_APPS = [
     "daphne",
-    "ddtrace.contrib.django",
     "rest_framework",
     "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
@@ -114,10 +112,21 @@ ASGI_APPLICATION = "config.asgi.application"
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.sqlite3",
+#         "NAME": BASE_DIR / "db.sqlite3",
+#     }
+# }
+
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": config("POSTGRES_DB", cast=str),
+        "USER": config("POSTGRES_USER", cast=str),
+        "PASSWORD": config("POSTGRES_PASSWORD", cast=str),
+        "HOST": "postgres",
+        "PORT": config("POSTGRES_PORT", cast=int),
     }
 }
 
@@ -131,8 +140,9 @@ CHANNEL_LAYERS = {
 }
 
 if ENV == "production":
+    import dj_database_url
 
-    DATABASES["default"] = dj_database_url.parse(config("DATABASE_URL"))
+    DATABASES["default"] = dj_database_url.parse(config("DATABASE_URL", cast=str))
 
     CHANNEL_LAYERS = {
         "default": {
