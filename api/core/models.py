@@ -1,6 +1,5 @@
 from django.db import models
 from api.accounts.models import User
-from api.common.models import CommonModel
 from api.packages.models import Package
 
 

@@ -35,8 +35,11 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "https://*",
 ]
+
+site_domain = config("RAILWAY_PUBLIC_DOMAIN", default="")
+
 CSRF_TRUSTED_ORIGINS = [
-    "https://*",
+    f"https://{site_domain}",
 ]
 
 X_FRAME_OPTIONS = "DENY"
@@ -130,7 +133,6 @@ CHANNEL_LAYERS = {
 
 CELERY_BROKER_URL = "redis://localhost:6379/0"
 
-
 # if ENV == "production":
 #     import dj_database_url
 
@@ -142,6 +144,9 @@ CELERY_BROKER_URL = "redis://localhost:6379/0"
 #             "CONFIG": {"hosts": config("REDIS_URL", cast=str)},
 #         },
 #     }
+
+#     CELERY_BROKER_URL = config("REDIS_URL", cast=str)
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
