@@ -6,7 +6,7 @@ dump.rdb
 portone.py
 Dockerfile
 docker-compose.yml
-
+.dockerignore
 
 ### Django ###
 *.log
