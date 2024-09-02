@@ -112,23 +112,23 @@ ASGI_APPLICATION = "config.asgi.application"
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.sqlite3",
-#         "NAME": BASE_DIR / "db.sqlite3",
-#     }
-# }
-
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": config("POSTGRES_DB", cast=str),
-        "USER": config("POSTGRES_USER", cast=str),
-        "PASSWORD": config("POSTGRES_PASSWORD", cast=str),
-        "HOST": "postgres",
-        "PORT": config("POSTGRES_PORT", cast=int),
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     }
 }
+
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.postgresql",
+#         "NAME": config("POSTGRES_DB", cast=str),
+#         "USER": config("POSTGRES_USER", cast=str),
+#         "PASSWORD": config("POSTGRES_PASSWORD", cast=str),
+#         "HOST": "postgres",
+#         "PORT": config("POSTGRES_PORT", cast=int),
+#     }
+# }
 
 CHANNEL_LAYERS = {
     "default": {
