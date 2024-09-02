@@ -29,14 +29,18 @@ SECRET_KEY = config("DJANGO_SECRET", cast=str)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DEBUG", cast=bool)
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = [
+    "127.0.0.1",
+    "localhost",
+    "mvp-be-production-8fc5.up.railway.app",
+]
 CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5173",
     "http://localhost:5173",
-    "https://mvp-be-production.up.railway.app",
+    "https://mvp-be-production-8fc5.up.railway.app",
 ]
 CSRF_TRUSTED_ORIGINS = [
-    "https://mvp-be-production.up.railway.app",
+    "https://mvp-be-production-8fc5.up.railway.app",
 ]
 
 X_FRAME_OPTIONS = "DENY"
