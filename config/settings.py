@@ -119,17 +119,6 @@ DATABASES = {
     }
 }
 
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.postgresql",
-#         "NAME": config("POSTGRES_DB", cast=str),
-#         "USER": config("POSTGRES_USER", cast=str),
-#         "PASSWORD": config("POSTGRES_PASSWORD", cast=str),
-#         "HOST": "postgres",
-#         "PORT": config("POSTGRES_PORT", cast=int),
-#     }
-# }
-
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
