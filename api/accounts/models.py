@@ -1,3 +1,4 @@
+import shortuuid
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
@@ -9,7 +10,9 @@ class User(AbstractUser):
         BUSINESS = ("개인사업자", "개인사업자")
         CORPORATE = ("법인사업자", "법인사업자")
 
-    id = models.CharField(max_length=22, primary_key=True, editable=False)
+    id = models.CharField(
+        max_length=22, default=shortuuid.uuid, primary_key=True, editable=False
+    )
     name = models.CharField(max_length=100, default="익명의 사용자")
     avatar = models.URLField(
         default="https://cdn-icons-png.flaticon.com/512/149/149071.png", blank=True
