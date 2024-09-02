@@ -12,7 +12,7 @@ class PackageCUDSerializer(ModelSerializer):
         write_only=True,
     )
     thumbnail = ImageField(required=True)
-    tags = TagListSerializerField()
+    tags = TagListSerializerField(required=False)
 
 
     class Meta:
@@ -33,11 +33,16 @@ class PackageCUDSerializer(ModelSerializer):
         validated_data['provider'] = self.context.get('request').user
         images = validated_data.pop('images', None)
         thumbnail = validated_data.pop('thumbnail', None)
+        tags = validated_data.pop('tags', [])
+        tags_v = [t.strip() for t in tags[0].split(",") if t.strip()]
         
         package = super().create(validated_data)
         
         save_thumbnail(thumbnail, package)
         save_package_images(images, package)
+        
+        for tag in tags_v:
+            package.tags.add(tag)
         return package
 
 
