@@ -4,6 +4,9 @@
 /staticfiles
 dump.rdb
 portone.py
+Dockerfile
+docker-compose.yml
+
 
 ### Django ###
 *.log
