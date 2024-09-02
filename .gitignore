@@ -4,6 +4,14 @@
 /staticfiles
 dump.rdb
 portone.py
+# Dockerfile
+docker-compose.yml
+# .dockerignore
+Procfile
+test.html
+runtime.txt
+websocket_test.html
+
 
 ### Django ###
 *.log

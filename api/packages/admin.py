@@ -10,9 +10,16 @@ from .models import (
 )
 
 
+class PackageOptionInline(admin.TabularInline):
+    model = PackageOption
+    extra = 0
+
+
 @admin.register(Package)
 class PackageAdmin(admin.ModelAdmin):
-    pass
+    inlines = [PackageOptionInline]
+
+    list_display = ["id", "provider", "title", "created_at"]
 
 
 @admin.register(PackageProvider)

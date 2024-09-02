@@ -8,7 +8,9 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
+from drf_yasg.utils import swagger_auto_schema
 from .throttles import SendBankVerificationThrottle
+from .serializers import GoogleSerializer, KakaoSerializer, NaverSerializer
 from .models import User
 
 import logging
@@ -21,15 +23,15 @@ class GoogleView(APIView):
 
     permission_classes = [AllowAny]
 
+    @swagger_auto_schema(request_body=GoogleSerializer)
     def post(self, request):
 
-        code = request.data.get("code")
+        serializer = GoogleSerializer(data=request.data)
 
-        if not code:
-            return Response(
-                {"error": "code는 필수 항목입니다."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        code = serializer.validated_data["code"]
 
         logger.debug(f"구글 로그인 code: {code}")
 
@@ -118,16 +120,16 @@ class NaverView(APIView):
 
     permission_classes = [AllowAny]
 
+    @swagger_auto_schema(request_body=NaverSerializer)
     def post(self, request):
 
-        code = request.data.get("code")
-        state = request.data.get("state")
+        serializer = NaverSerializer(data=request.data)
 
-        if not code or not state:
-            return Response(
-                {"error": "code와 state는 필수 항목입니다."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        code = serializer.validated_data["code"]
+        state = serializer.validated_data["state"]
 
         logger.debug(f"네이버 로그인 code: {code}")
         logger.debug(f"네이버 로그인 state: {state}")
@@ -365,7 +367,7 @@ class ConfirmBankVerificationView(APIView):
 
 
 class BusinessVerificationView(APIView):
-    """국세청_사업자등록정보 유효성검증"""
+    """국세청 사업자등록정보 유효성검증"""
 
     permission_classes = [IsAuthenticated]
 
@@ -403,3 +405,16 @@ class BusinessVerificationView(APIView):
                 {"error": str(e)},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+
+
+class IdentityVerificationView(APIView):
+    """본인인증"""
+
+    def post(self, request):
+
+        # 본인인증 api 구현
+
+        return Response(
+            {"message": "본인인증이 성공적으로 완료되었습니다."},
+            status=status.HTTP_200_OK,
+        )

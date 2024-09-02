@@ -9,6 +9,7 @@ from .views import (
     SendBankVerificationView,
     ConfirmBankVerificationView,
     BusinessVerificationView,
+    IdentityVerificationView,
 )
 
 urlpatterns = (
@@ -39,11 +40,17 @@ urlpatterns = (
             ConfirmBankVerificationView.as_view(),
             name="bank_verification_confirm",
         ),
-        # 국세청_사업자등록정보 유효성검증
+        # 국세청 사업자등록정보 유효성검증
         path(
             "accounts/business/verify/",
             BusinessVerificationView.as_view(),
             name="business_verification",
+        ),
+        # 본인인증
+        path(
+            "accounts/identity/verify/",
+            IdentityVerificationView.as_view(),
+            name="identity_verification",
         ),
     ]
 )
