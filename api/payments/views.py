@@ -55,9 +55,7 @@ class PortOneWebhookView(APIView):
                     reservation.status == reservation.ReservationStatus.CONFIRMED
                     and reservation.payment_status == Reservation.PaymentStatus.PENDING
                 ):
-                    reservation.payment_status = (
-                        Reservation.PaymentStatus.SHIPPING_REGISTERED
-                    )
+                    reservation.payment_status = Reservation.PaymentStatus.PAID
                     reservation.save()
                 else:
                     return Response(

@@ -6,8 +6,11 @@ from api.common.models import CommonModel
 class AbstractPayment(CommonModel):
 
     class PaymentStatus(models.TextChoices):
-        # 1 결제가 이루어졌지만 아직 승인되지 않은 상태
+
+        # 입금이 안된 상태
         PENDING = ("대기중", "대기중")
+
+        PAID = ("입금완료", "입금완료")
 
         # 2 배송등록 단계: 상품이 발송되고 배송이 등록된 상태
         SHIPPING_REGISTERED = ("배송등록", "배송등록")

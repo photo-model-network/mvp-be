@@ -223,16 +223,13 @@ class PayReservationView(APIView):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
-            if (
-                reservation.payment_status
-                == Reservation.PaymentStatus.SHIPPING_REGISTERED
-            ):
+            if reservation.payment_status == Reservation.PaymentStatus.PAID:
                 return Response(
                     {"message": "이미 결제가 처리되었습니다."},
                     status=status.HTTP_200_OK,
                 )
 
-            reservation.payment_status = reservation.PaymentStatus.SHIPPING_REGISTERED
+            reservation.payment_status = reservation.PaymentStatus.PAID
             reservation.save()
 
             return Response(
