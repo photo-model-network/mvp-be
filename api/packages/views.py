@@ -15,6 +15,7 @@ from api.packages.serializers import (
     PackageDetailSerializer,
 )
 from .permissions import IsPackageProvider
+from api.core.tasks import save_interaction
 
 
 class PackageCreateView(CreateAPIView):
@@ -22,7 +23,7 @@ class PackageCreateView(CreateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = PackageCUDSerializer
 
-    def perform_create(self, serializer):            
+    def perform_create(self, serializer):
         serializer.save()
 
 
@@ -75,6 +76,16 @@ class PackageDetailView(RetrieveAPIView):
 
     queryset = Package.objects.all()
     serializer_class = PackageDetailSerializer
+
+    def retrieve(self, request, *args, **kwargs):
+        response = super().retrieve(request, *args, **kwargs)
+        package = self.get_object()
+
+        # 로그인된 사용자의 경우 인터랙션 저장
+        if request.user.is_authenticated:
+            save_interaction.delay(request.user.id, package.id, "view")
+
+        return response
 
 
 class PackageUpdateView(UpdateAPIView):
