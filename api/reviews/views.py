@@ -45,6 +45,9 @@ class ReviewUpdateView(UpdateAPIView):
     serializer_class = ReviewCRUDSerializer
 
     def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):
+            return Review.objects.none()
+
         return Review.objects.filter(
             package__id=self.kwargs["package_id"], customer=self.request.user
         )
@@ -55,8 +58,11 @@ class ReviewDeleteView(DestroyAPIView):
     serializer_class = ReviewCRUDSerializer
 
     def get_queryset(self):
+        if getattr(self, "swagger_fake_view", False):
+            return Review.objects.none()
+
         return Review.objects.filter(
             package__id=self.kwargs["package_id"],
             customer=self.request.user,
-            id=self.kwargs["pk"],
+            id=self.request.user,
         )
