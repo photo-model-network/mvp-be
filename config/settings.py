@@ -14,11 +14,14 @@ from pathlib import Path
 from decouple import config
 from pytz import timezone
 
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
+
+ENV = config("ENV", default="development")
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config("DJANGO_SECRET", cast=str)
@@ -30,10 +33,10 @@ ALLOWED_HOSTS = ["*"]
 CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5173",
     "http://localhost:5173",
-    "https://mvp-be-production.up.railway.app",
+    "https://*",
 ]
 CSRF_TRUSTED_ORIGINS = [
-    "https://mvp-be-production.up.railway.app",
+    "https://*",
 ]
 
 X_FRAME_OPTIONS = "DENY"
@@ -76,7 +79,6 @@ INSTALLED_APPS += CUSTOM_APPS
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -117,6 +119,37 @@ DATABASES = {
     }
 }
 
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.postgresql",
+#         "NAME": config("POSTGRES_DB", cast=str),
+#         "USER": config("POSTGRES_USER", cast=str),
+#         "PASSWORD": config("POSTGRES_PASSWORD", cast=str),
+#         "HOST": "postgres",
+#         "PORT": config("POSTGRES_PORT", cast=int),
+#     }
+# }
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
+    },
+}
+
+if ENV == "production":
+    import dj_database_url
+
+    DATABASES["default"] = dj_database_url.parse(config("DATABASE_URL", cast=str))
+
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {"hosts": config("REDIS_URL", cast=str)},
+        },
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -262,17 +295,6 @@ LOGGING = {
             "handlers": ["console"],
             "level": "DEBUG" if DEBUG else "WARNING",
             "propagate": False,
-        },
-    },
-}
-
-
-# Channels
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [("127.0.0.1", 6379)],
         },
     },
 }
