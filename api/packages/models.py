@@ -10,7 +10,8 @@ class PackagePicture(CommonModel):
     """촬영 패키지 소개 이미지 (여러장)"""
 
     package = models.ForeignKey("Package", on_delete=models.CASCADE)
-    image = models.URLField()
+    original_url = models.ImageField()
+    store_url = models.ImageField()
 
     class Meta:
         verbose_name = "패키지 소개 이미지"
@@ -125,7 +126,8 @@ class Package(CommonModel):
     # 패키지 제목
     title = models.CharField(max_length=255)
     # 대표 이미지
-    thumbnail = models.URLField()
+    thumbnail = models.ImageField()
+    thumbnail_store_url = models.ImageField(blank=True, null=True)
     # 패키지 요약 (카드로 표시될 경우 간단히 보이는 글)
     summary = models.TextField()
     # 패키지 내용 (에디터로 작성한 글과 이미지)
