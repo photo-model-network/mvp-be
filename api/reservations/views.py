@@ -1,9 +1,8 @@
-import pytz
 import requests
+from datetime import timedelta, datetime
 from django.conf import settings
-from django.db import IntegrityError
-from django.db.models import Q
 from django.shortcuts import get_object_or_404
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -11,8 +10,9 @@ from rest_framework.permissions import IsAuthenticated
 from api.packages.models import Package, PackageOption
 from api.accounts.models import User
 from api.timeslots.models import UnavailableTimeSlot
+from .serializers import RequestReservationSerializer, PayReservationSerializer
 from .models import Reservation, ReservationOption
-from datetime import timedelta, datetime
+
 
 import logging
 
@@ -24,28 +24,36 @@ class RequestReservationView(APIView):
 
     permission_classes = [IsAuthenticated]
 
+    @swagger_auto_schema(request_body=RequestReservationSerializer)
     def post(self, request):
 
-        package_id = request.data.get("packageId")
-        customer_id = request.user.id
+        serializer = RequestReservationSerializer(data=request.data)
 
-        filming_date = request.data.get("filmingDate")
-        filming_start_time = request.data.get("filmingStartTime")
-        selected_option_id = request.data.get("selectedOption")
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        package_id = serializer.validated_data["packageId"]
+        filming_date = serializer.validated_data["filmingDate"]
+        filming_start_time = serializer.validated_data["filmingStartTime"]
+        selected_option_id = serializer.validated_data["selectedOption"]
+
+        # package_id = request.data.get("packageId")
+        # customer_id = request.user.id
+
+        # filming_date = request.data.get("filmingDate")
+        # filming_start_time = request.data.get("filmingStartTime")
+        # selected_option_id = request.data.get("selectedOption")
 
         try:
 
             package = get_object_or_404(Package, id=package_id)
-            customer = get_object_or_404(User, id=customer_id)
+            customer = get_object_or_404(User, id=request.user.id)
             selected_option = get_object_or_404(
                 PackageOption, id=selected_option_id, package=package
             )
 
             # filming_date와 filming_start_time을 결합하여 datetime 객체로 변환
-            start_datetime_naive = datetime.combine(
-                datetime.strptime(filming_date, "%Y-%m-%d").date(),
-                datetime.strptime(filming_start_time, "%H:%M:%S").time(),
-            )
+            start_datetime_naive = datetime.combine(filming_date, filming_start_time)
 
             # 타임존을 한국 표준시(KST)로 변환
             start_datetime = settings.KST.localize(start_datetime_naive)
@@ -97,6 +105,7 @@ class RequestReservationView(APIView):
                         status=status.HTTP_400_BAD_REQUEST,
                     )
             else:
+
                 reservation = Reservation.objects.create(
                     package=package,
                     customer=customer,
@@ -153,45 +162,83 @@ class ConfirmReservationView(APIView):
             )
 
 
-# class PayReservationView(APIView):
-#     """구매자가 확정된 예약을 결제(검증)"""
+class PayReservationView(APIView):
+    """구매자가 확정된 예약을 결제(검증)"""
 
-#     permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
-#     def post(self, request):
-#         try:
-#             payment_id = request.data.get("paymentId")
-#             reservation_id = request.data.get("reservationId")
-#             # 해당 paymentId로 결제 정보 조회
-#             response = requests.get(
-#                 f"https://api.portone.io/payments/{payment_id}",
-#                 headers={"Authorization": f"PortOne {settings.PORTONE_SECRET}"},
-#             )
+    @swagger_auto_schema(request_body=PayReservationSerializer)
+    def post(self, request):
+        try:
 
-#             if response.status_code == 200:
-#                 response_data = response.json()
+            serializer = PayReservationSerializer(data=request.data)
 
-#                 # 해당 예약이 본인의 예약이 맞는지 검증
-#                 reservation = get_object_or_404(
-#                     Reservation, id=reservation_id, customer=request.user
-#                 )
+            if not serializer.is_valid():
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-#                 if reservation.status == reservation.StatusChoices.ESCROW_HOLD:
-#                     return Response(
-#                         {"message": "해당 예약 건은 이미 배송등록 단계입니다."},
-#                     )
+            payment_id = serializer.validated_data["paymentId"]
+            # payment_id = request.data.get("paymentId")
 
-#                 selected_options = reservation.options.all()
+            # if not payment_id:
+            #     return Response(
+            #         {"error": "paymentId는 필수 항목입니다."},
+            #         status=status.HTTP_400_BAD_REQUEST,
+            #     )
 
-#                 selected_options = reservation.options.all()
-#                 print(selected_options)
+            reservation = get_object_or_404(
+                Reservation, payment_id=payment_id, customer=request.user
+            )
 
-#             else:
-#                 return Response(
-#                     {"message": "결제 검증 실패", "code": status.HTTP_400_BAD_REQUEST}
-#                 )
+            if reservation.payment_status != Reservation.PaymentStatus.PENDING:
+                return Response(
+                    {"message": "결제가 이미 처리(결제 성공)되었습니다."},
+                    status=status.HTTP_200_OK,
+                )
 
-#         except requests.exceptions.RequestException as e:
-#             return Response(
-#                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
-#             )
+            # 결제 정보 조회 시도
+            try:
+                response = requests.get(
+                    f"https://api.portone.io/payments/{payment_id}",
+                    headers={"Authorization": f"PortOne {settings.PORTONE_SECRET}"},
+                )
+            except requests.exceptions.RequestException:
+                return Response(
+                    {
+                        "message": "네트워크 오류로 인해 결제 상태를 확인할 수 없습니다. 결제 완료 후 상태가 자동으로 업데이트됩니다.",
+                    },
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                )
+
+            response_data = response.json()
+
+            if reservation.status != reservation.ReservationStatus.CONFIRMED:
+                return Response(
+                    {"error": "예약이 확정되지 않았습니다."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            if reservation.calculate_total_price() != response_data["amount"]["total"]:
+                return Response(
+                    {"error": "결제 금액이 일치하지 않습니다."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            if reservation.payment_status == Reservation.PaymentStatus.PAID:
+                return Response(
+                    {"message": "이미 결제가 처리되었습니다."},
+                    status=status.HTTP_200_OK,
+                )
+
+            reservation.payment_status = reservation.PaymentStatus.PAID
+            reservation.save()
+
+            return Response(
+                {"message": "결제가 성공적으로 처리되었습니다."},
+                status=status.HTTP_200_OK,
+            )
+
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )

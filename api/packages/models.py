@@ -1,5 +1,5 @@
+import shortuuid
 from django.db import models
-from shortuuid.django_fields import ShortUUIDField
 from taggit.models import GenericTaggedItemBase, TagBase
 from taggit.managers import TaggableManager
 from api.common.models import CommonModel
@@ -10,7 +10,8 @@ class PackagePicture(CommonModel):
     """촬영 패키지 소개 이미지 (여러장)"""
 
     package = models.ForeignKey("Package", on_delete=models.CASCADE)
-    image = models.URLField()
+    original_url = models.ImageField()
+    store_url = models.ImageField()
 
     class Meta:
         verbose_name = "패키지 소개 이미지"
@@ -91,7 +92,7 @@ class PackageTaggedItem(GenericTaggedItemBase):
         related_name="%(app_label)s_%(class)s_items",
         on_delete=models.CASCADE,
     )
-    object_id = ShortUUIDField()
+    object_id = models.CharField(max_length=22, default=shortuuid.uuid, editable=False)
 
     def __str__(self):
         return f"{self.object_id} : [{self.tag}]"
@@ -113,26 +114,9 @@ class Package(CommonModel):
         PET = ("반려동물", "반려동물")
         BASIC_SHOOTING = ("기본촬영대행", "기본촬영대행")
 
-    class LocationChoices(models.TextChoices):
-        GYEONGGI = ("경기", "경기")
-        BUSAN = ("부산", "부산")
-        SEOUL = ("서울", "서울")
-        INCHEON = ("인천", "인천")
-        DAEGU = ("대구", "대구")
-        GWANGJU = ("광주", "광주")
-        DAEJEON = ("대전", "대전")
-        ULSAN = ("울산", "울산")
-        SEJONG = ("세종", "세종")
-        GANGWON = ("강원", "강원")
-        CHUNGBUK = ("충북", "충북")
-        CHUNGNAM = ("충남", "충남")
-        JEONBUK = ("전북", "전북")
-        JEONNAM = ("전남", "전남")
-        GYEONGBUK = ("경북", "경북")
-        GYEONGNAM = ("경남", "경남")
-        JEJU = ("제주", "제주")
-
-    id = ShortUUIDField(max_length=22, primary_key=True, editable=False)
+    id = models.CharField(
+        max_length=22, default=shortuuid.uuid, primary_key=True, editable=False
+    )
     # 패키지 카테고리
     category = models.CharField(
         max_length=20, choices=CategoryChoices.choices, default=CategoryChoices.PROFILE
@@ -144,11 +128,8 @@ class Package(CommonModel):
     # 패키지 제목
     title = models.CharField(max_length=255)
     # 대표 이미지
-    thumbnail = models.URLField()
-    # 패키지 지역
-    location = models.CharField(
-        max_length=5, choices=LocationChoices.choices, default=LocationChoices.SEOUL
-    )
+    thumbnail = models.ImageField()
+    thumbnail_store_url = models.ImageField(blank=True, null=True)
     # 패키지 요약 (카드로 표시될 경우 간단히 보이는 글)
     summary = models.TextField()
     # 패키지 내용 (에디터로 작성한 글과 이미지)
@@ -164,3 +145,5 @@ class Package(CommonModel):
     class Meta:
         verbose_name = "패키지"
         verbose_name_plural = "패키지"
+
+        ordering = ["-created_at"]

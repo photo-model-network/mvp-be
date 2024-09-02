@@ -14,11 +14,14 @@ from pathlib import Path
 from decouple import config
 from pytz import timezone
 
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
+
+ENV = config("ENV", default="development")
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config("DJANGO_SECRET", cast=str)
@@ -27,7 +30,19 @@ SECRET_KEY = config("DJANGO_SECRET", cast=str)
 DEBUG = config("DEBUG", cast=bool)
 
 ALLOWED_HOSTS = ["*"]
-CORS_ALLOW_ALL_ORIGINS = True  # 개발 시에만
+CORS_ALLOWED_ORIGINS = [
+    "http://127.0.0.1:5173",
+    "http://localhost:5173",
+    "https://*",
+]
+
+site_domain = config("RAILWAY_PUBLIC_DOMAIN", default="")
+
+CSRF_TRUSTED_ORIGINS = [
+    f"https://{site_domain}",
+]
+
+X_FRAME_OPTIONS = "DENY"
 
 APPEND_SLASH = True
 # Application definition
@@ -36,6 +51,7 @@ INSTALLED_APPS = [
     "daphne",
     "rest_framework",
     "rest_framework_simplejwt",
+    "rest_framework_simplejwt.token_blacklist",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -49,7 +65,9 @@ INSTALLED_APPS = [
 
 CUSTOM_APPS = [
     "api.common",
+    "api.core",
     "api.accounts",
+    "api.studios",
     "api.payments",
     "api.reservations",
     "api.packages",
@@ -64,7 +82,6 @@ INSTALLED_APPS += CUSTOM_APPS
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -105,6 +122,31 @@ DATABASES = {
     }
 }
 
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
+    },
+}
+
+CELERY_BROKER_URL = "redis://localhost:6379/0"
+
+# if ENV == "production":
+#     import dj_database_url
+
+#     DATABASES["default"] = dj_database_url.parse(config("DATABASE_URL", cast=str))
+
+#     CHANNEL_LAYERS = {
+#         "default": {
+#             "BACKEND": "channels_redis.core.RedisChannelLayer",
+#             "CONFIG": {"hosts": config("REDIS_URL", cast=str)},
+#         },
+#     }
+
+#     CELERY_BROKER_URL = config("REDIS_URL", cast=str)
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -142,14 +184,14 @@ KST = timezone(TIME_ZONE)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = "/static/"
-STATICFILES_DIRS = [BASE_DIR / "static"]
-STATIC_ROOT = BASE_DIR / "staticfiles"
+# STATICFILES_DIRS = [BASE_DIR / "static"]
+# STATIC_ROOT = BASE_DIR / "staticfiles"
 
-if not DEBUG:
-    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+# if not DEBUG:
+#     STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-MEDIA_ROOT = BASE_DIR / "uploads"
-MEDIA_URL = "/uploads/"
+# MEDIA_ROOT = BASE_DIR / "uploads"
+# MEDIA_URL = "/uploads/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
@@ -167,9 +209,40 @@ GOOGLE_CLIENT = config("GOOGLE_CLIENT", cast=str)
 GOOGLE_SECRET = config("GOOGLE_SECRET", cast=str)
 SOCIAL_CALLBACK_URI = config("SOCIAL_CALLBACK_URI", cast=str)
 
-# PORTONE_SECRET = config("PORTONE_SECRET", cast=str)
+PORTONE_SECRET = config("PORTONE_SECRET", cast=str)
+PORTONE_WEBHOOK = config("PORTONE_WEBHOOK", cast=str)
 
 APICK_SECRET = config("APICK_SECRET", cast=str)
+
+NTS_SECRET = config("NTS_SECRET", cast=str)
+
+
+AWS_S3_REGION_NAME = "auto"
+CLOUDFLARE_R2_BUCKET_NAME = config("CLOUDFLARE_R2_BUCKET_NAME", cast=str)
+CLOUDFLARE_R2_ACCESS = config("CLOUDFLARE_R2_ACCESS", cast=str)
+CLOUDFLARE_R2_SECRET = config("CLOUDFLARE_R2_SECRET", cast=str)
+CLOUDFLARE_R2_ENDPOINT = config("CLOUDFLARE_R2_ENDPOINT", cast=str)
+
+
+CLOUDFLARE_R2_CONFIG_OPTIONS = {
+    "bucket_name": CLOUDFLARE_R2_BUCKET_NAME,
+    "access_key": CLOUDFLARE_R2_ACCESS,
+    "secret_key": CLOUDFLARE_R2_SECRET,
+    "endpoint_url": CLOUDFLARE_R2_ENDPOINT,
+    "default_acl": "public-read",
+    "signature_version": "s3v4",
+}
+
+STORAGES = {
+    "default": {
+        "BACKEND": "api.helpers.cloudflare.storages.MediaFileStorage",
+        "OPTIONS": CLOUDFLARE_R2_CONFIG_OPTIONS,
+    },
+    "staticfiles": {
+        "BACKEND": "api.helpers.cloudflare.storages.StaticFileStorage",
+        "OPTIONS": CLOUDFLARE_R2_CONFIG_OPTIONS,
+    },
+}
 
 # REST Simple JWT 설정
 
@@ -189,8 +262,12 @@ REST_FRAMEWORK = {
 from datetime import timedelta
 
 SIMPLE_JWT = {
+    "ALGORITHM": "HS256",
+    "SIGNING_KEY": SECRET_KEY,
     "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
 }
 
 # 로거 설정
@@ -215,18 +292,6 @@ LOGGING = {
             "handlers": ["console"],
             "level": "DEBUG" if DEBUG else "WARNING",
             "propagate": False,
-        },
-    },
-}
-
-
-# Channels
-
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [("127.0.0.1", 6379)],
         },
     },
 }

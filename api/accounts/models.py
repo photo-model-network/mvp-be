@@ -1,6 +1,6 @@
+import shortuuid
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-from shortuuid.django_fields import ShortUUIDField
 
 
 class User(AbstractUser):
@@ -10,7 +10,9 @@ class User(AbstractUser):
         BUSINESS = ("개인사업자", "개인사업자")
         CORPORATE = ("법인사업자", "법인사업자")
 
-    id = ShortUUIDField(max_length=22, primary_key=True, editable=False)
+    id = models.CharField(
+        max_length=22, default=shortuuid.uuid, primary_key=True, editable=False
+    )
     name = models.CharField(max_length=100, default="익명의 사용자")
     avatar = models.URLField(
         default="https://cdn-icons-png.flaticon.com/512/149/149071.png", blank=True
@@ -45,8 +47,11 @@ class User(AbstractUser):
 
     # 사업자 등록 번호
     business_license_number = models.CharField(max_length=30, blank=True, null=True)
-    # 사업자 진위 여부
+    # 사업자 여부
     is_business = models.BooleanField(default=False)
+
+    # 스튜디오 보유 여부
+    has_studio = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         # 아바타가 없을 경우 기본 이미지 저장

@@ -1,12 +1,16 @@
 import re
+import json
 import requests
 from django.conf import settings
+from django.contrib.auth.hashers import make_password
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
+from drf_yasg.utils import swagger_auto_schema
 from .throttles import SendBankVerificationThrottle
+from .serializers import GoogleSerializer, KakaoSerializer, NaverSerializer
 from .models import User
 
 import logging
@@ -19,15 +23,15 @@ class GoogleView(APIView):
 
     permission_classes = [AllowAny]
 
+    @swagger_auto_schema(request_body=GoogleSerializer)
     def post(self, request):
 
-        code = request.data.get("code")
+        serializer = GoogleSerializer(data=request.data)
 
-        if not code:
-            return Response(
-                {"error": "code는 필수 항목입니다."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        code = serializer.validated_data["code"]
 
         logger.debug(f"구글 로그인 code: {code}")
 
@@ -107,6 +111,7 @@ class KakaoView(APIView):
     """카카오 소셜 연동 회원가입 및 로그인"""
 
     # 사업자번호를 등록해야 이메일 필드값을 받을 수 있어 추후 연동
+
     pass
 
 
@@ -115,16 +120,16 @@ class NaverView(APIView):
 
     permission_classes = [AllowAny]
 
+    @swagger_auto_schema(request_body=NaverSerializer)
     def post(self, request):
 
-        code = request.data.get("code")
-        state = request.data.get("state")
+        serializer = NaverSerializer(data=request.data)
 
-        if not code or not state:
-            return Response(
-                {"error": "code와 state는 필수 항목입니다."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        code = serializer.validated_data["code"]
+        state = serializer.validated_data["state"]
 
         logger.debug(f"네이버 로그인 code: {code}")
         logger.debug(f"네이버 로그인 state: {state}")
@@ -204,16 +209,49 @@ class NaverView(APIView):
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
-# class LogoutView(APIView):
-
-#     permission_classes = [IsAuthenticated]
-
+# class RegisterView(APIView):
 #     def post(self, request):
-#         logout(request)
-#         return Response({"message": "로그아웃 성공!"}, status=status.HTTP_200_OK)
+
+#         username = request.data.get("username")
+#         password = request.data.get("password")
+#         name = request.data.get("name")
+
+#         if not username or not password or not name:
+#             return Response(
+#                 {"error": "모든 필드를 입력해야 합니다."},
+#                 status=status.HTTP_400_BAD_REQUEST,
+#             )
+
+#         # 중복 사용자명 확인
+#         if User.objects.filter(username=username).exists():
+#             return Response(
+#                 {"error": "이미 사용중인 아이디입니다."},
+#                 status=status.HTTP_400_BAD_REQUEST,
+#             )
+
+#         try:
+
+#             user = User.objects.create(
+#                 username=username,
+#                 email=username,
+#                 name=name,
+#                 password=make_password(password),
+#             )
+
+#             user.save()
+
+#             return Response(
+#                 {"message": "회원가입이 성공적으로 완료되었습니다."},
+#                 status=status.HTTP_201_CREATED,
+#             )
+#         except Exception as e:
+#             return Response(
+#                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+#             )
 
 
 class SendBankVerificationView(APIView):
+    """계좌로 1원 전송 및 인증 코드 저장"""
 
     permission_classes = [IsAuthenticated]
     throttle_classes = [SendBankVerificationThrottle]
@@ -286,6 +324,7 @@ class SendBankVerificationView(APIView):
 
 
 class ConfirmBankVerificationView(APIView):
+    """계좌로 전송된 인증 코드 일치 여부 확인"""
 
     permission_classes = [IsAuthenticated]
 
@@ -325,3 +364,57 @@ class ConfirmBankVerificationView(APIView):
                 {"message": "해당 계좌 인증 정보를 찾을 수 없습니다."},
                 status=status.HTTP_404_NOT_FOUND,
             )
+
+
+class BusinessVerificationView(APIView):
+    """국세청 사업자등록정보 유효성검증"""
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+
+        business_num = request.data.get("businessNum")
+
+        if not business_num:
+            return Response(
+                {"error": '사업자등록번호를 10자리를  " - " 없이 입력해주세요.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            response = requests.post(
+                f"https://api.odcloud.kr/api/nts-businessman/v1/status?serviceKey={settings.NTS_SECRET}",
+                headers={
+                    "Content-Type": "application/json",
+                },
+                data=json.dumps(
+                    {
+                        "b_no": [business_num],
+                    }
+                ),
+            )
+            return Response(response.json(), status=status.HTTP_200_OK)
+
+        except requests.exceptions.RequestException as e:
+            return Response(
+                {"error": "네트워크 오류가 발생했습니다."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+
+class IdentityVerificationView(APIView):
+    """본인인증"""
+
+    def post(self, request):
+
+        # 본인인증 api 구현
+
+        return Response(
+            {"message": "본인인증이 성공적으로 완료되었습니다."},
+            status=status.HTTP_200_OK,
+        )
