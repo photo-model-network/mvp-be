@@ -1,0 +1,17 @@
+name: Publish Docker Image
+
+on:
+  push:
+    branches:
+      - production
+
+jobs:
+  build_and_publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and push Docker Image
+        run: |
+          docker login ghcr.io --username madeffort --password ${{ secrets.MADEFFORT_TOKEN }}
+          docker build . -t ghcr.io/madeffort/pmn-app-image
+          docker push ghcr.io/madeffort/pmn-app-image
