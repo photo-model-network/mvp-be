@@ -29,6 +29,8 @@ SECRET_KEY = config("DJANGO_SECRET", cast=str)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DEBUG", cast=bool)
 
+site_domain = config("RAILWAY_PUBLIC_DOMAIN", default="")
+
 ALLOWED_HOSTS = ["*"]
 CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5173",
@@ -38,7 +40,7 @@ CORS_ALLOWED_ORIGINS = [
 
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://*",
+    f"https://{site_domain}",
 ]
 
 X_FRAME_OPTIONS = "DENY"
