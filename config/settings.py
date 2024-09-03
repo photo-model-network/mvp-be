@@ -133,17 +133,17 @@ CHANNEL_LAYERS = {
 
 CELERY_BROKER_URL = "redis://localhost:6379/0"
 
-# if ENV == "production":
-#     import dj_database_url
+if ENV == "production":
+    import dj_database_url
 
-#     DATABASES["default"] = dj_database_url.parse(config("DATABASE_URL", cast=str))
+    DATABASES["default"] = dj_database_url.parse(config("DATABASE_URL", cast=str))
 
-#     CHANNEL_LAYERS = {
-#         "default": {
-#             "BACKEND": "channels_redis.core.RedisChannelLayer",
-#             "CONFIG": {"hosts": config("REDIS_URL", cast=str)},
-#         },
-#     }
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {"hosts": config("REDIS_URL", cast=str)},
+        },
+    }
 
 #     CELERY_BROKER_URL = config("REDIS_URL", cast=str)
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
