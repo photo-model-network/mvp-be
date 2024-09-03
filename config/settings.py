@@ -143,7 +143,7 @@ if ENV == "development":
 
     DATABASES = {
         "default": {
-            "ENGINE": "django.db.backends.postgresql",
+            "ENGINE": "django.db.backends.sqlite3",
             "NAME": BASE_DIR / "db.sqlite3",
         }
     }
@@ -164,11 +164,11 @@ else:
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
-            "NAME": config("DB_NAME", cast=str),
-            "USER": config("DB_USER", cast=str),
-            "PASSWORD": config("DB_PASSWORD", cast=str),
-            "HOST": config("DB_HOST", cast=str),
-            "PORT": config("DB_PORT", cast=int),
+            "NAME": config("POSTGRES_NAME", cast=str),
+            "USER": config("POSTGRES_USER", cast=str),
+            "PASSWORD": config("POSTGRES_PASSWORD", cast=str),
+            "HOST": config("POSTGRES_HOST", cast=str),
+            "PORT": config("POSTGRES_PORT", cast=int),
         }
     }
 
