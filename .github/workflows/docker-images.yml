@@ -10,8 +10,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        run: echo ${{ secrets.MADEFFORT_TOKEN }} | docker login ghcr.io --username madeffort --password-stdin
+
       - name: Build and push Docker Image
         run: |
-          docker login ghcr.io --username madeffort --password ${{ secrets.MADEFFORT_TOKEN }}
           docker build . -t ghcr.io/madeffort/pmn-app-image
           docker push ghcr.io/madeffort/pmn-app-image
