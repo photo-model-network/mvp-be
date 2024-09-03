@@ -115,28 +115,62 @@ ASGI_APPLICATION = "config.asgi.application"
 
 # Database configuration
 
-if ENV == "production":
-    import dj_database_url
+# if ENV == "production":
+#     import dj_database_url
 
-    DATABASES = {"default": dj_database_url.parse(config("DATABASE_URL", cast=str))}
-else:
+#     DATABASES = {"default": dj_database_url.parse(config("DATABASE_URL", cast=str))}
+# else:
+#     DATABASES = {
+#         "default": {
+#             "ENGINE": "django.db.backends.sqlite3",
+#             "NAME": BASE_DIR / "db.sqlite3",
+#         }
+#     }
+
+# CHANNEL_LAYERS = {
+#     "default": {
+#         "BACKEND": "channels_redis.core.RedisChannelLayer",
+#         "CONFIG": {
+#             "hosts": [config("REDIS_URL", default="redis://localhost:6379/0", cast=str)]
+#         },
+#     },
+# }
+
+# CELERY_BROKER_URL = config("REDIS_URL", default="redis://localhost:6379/0", cast=str)
+# CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+
+if ENV == "development":
     DATABASES = {
         "default": {
-            "ENGINE": "django.db.backends.sqlite3",
+            "ENGINE": "django.db.backends.postgresql",
             "NAME": BASE_DIR / "db.sqlite3",
         }
     }
 
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [config("REDIS_URL", default="redis://localhost:6379/0", cast=str)]
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {
+                "hosts": [("127.0.0.1", 6379)],
+            },
         },
-    },
-}
+    }
 
-CELERY_BROKER_URL = config("REDIS_URL", default="redis://localhost:6379/0", cast=str)
+    CELERY_BROKER_URL = "redis://localhost:6379/0"
+else:
+    import dj_database_url
+
+    DATABASES = {"default": dj_database_url.parse(config("DATABASE_URL", cast=str))}
+
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {"hosts": config("REDIS_URL", cast=str)},
+        },
+    }
+
+    CELERY_BROKER_URL = config("REDIS_URL", cast=str)
+
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 
 # Password validation
