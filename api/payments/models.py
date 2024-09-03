@@ -31,7 +31,7 @@ class AbstractPayment(CommonModel):
         CANCELED = ("결제취소", "결제취소")
 
     # 고유 결제 ID
-    payment_id = models.CharField(
+    payment_id = models.UUIDField(
         max_length=128, default=uuid.uuid4, editable=False, unique=True
     )
     # 결제 금액

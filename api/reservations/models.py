@@ -1,5 +1,5 @@
-import shortuuid
 from django.db import models
+from shortuuid.django_fields import ShortUUIDField
 from api.common.models import CommonModel
 from api.packages.models import Package
 from api.accounts.models import User
@@ -16,9 +16,7 @@ class Reservation(AbstractPayment):
         DONE = ("작업완료", "작업완료")
         COMPLETE = ("구매확정", "구매확정")
 
-    id = models.CharField(
-        max_length=22, default=shortuuid.uuid, primary_key=True, editable=False
-    )
+    id = ShortUUIDField(primary_key=True, editable=False)
     package = models.ForeignKey(
         Package, on_delete=models.CASCADE, related_name="reservations"
     )
