@@ -3,6 +3,7 @@ import json
 import requests
 from django.conf import settings
 from django.contrib.auth.hashers import make_password
+from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -432,41 +433,26 @@ class IdentityVerificationView(APIView):
 
 
 
-class FavoriteArtistView(APIView):  # 관심 아티스트 등록 해제.
-    
+class FavoriteArtistManageView(APIView):
+    """관심 아티스트 등록 및 해제"""
     permission_classes = [IsAuthenticated]
 
     def post(self, request, artist_id):
         user = request.user
-        artist = User.objects.filter(id=artist_id, is_approved=True).first()
-
-        if not artist:
-            return Response({"detail": "해당 아티스트를 찾을 수 없습니다."}, status=status.HTTP_404_NOT_FOUND)
+        artist = get_object_or_404(User, id=artist_id, is_approved=True)
 
         if artist == user:
             return Response({"detail": "자신을 관심 아티스트로 등록할 수 없습니다."}, status=status.HTTP_400_BAD_REQUEST)
 
         if artist in user.favorite_artists.all():
-            return Response({"detail": "이미 관심 아티스트로 등록되어 있습니다."}, status=status.HTTP_400_BAD_REQUEST)
+            user.favorite_artists.remove(artist)
+            return Response({"detail": "관심 아티스트에서 해제되었습니다."}, status=status.HTTP_200_OK)
+        else:
+            user.favorite_artists.add(artist)
+            return Response({"detail": "관심 아티스트로 등록되었습니다."}, status=status.HTTP_200_OK)
 
-        user.favorite_artists.add(artist)
-        return Response({"detail": "관심 아티스트로 등록되었습니다."}, status=status.HTTP_200_OK)
-
-    def delete(self, request, artist_id):
-        user = request.user
-        artist = User.objects.filter(id=artist_id, is_approved=True).first()
-
-        if not artist:
-            return Response({"detail": "해당 아티스트를 찾을 수 없습니다."}, status=status.HTTP_404_NOT_FOUND)
-
-        if artist not in user.favorite_artists.all():
-            return Response({"detail": "관심 아티스트로 등록되어 있지 않습니다."}, status=status.HTTP_400_BAD_REQUEST)
-
-        user.favorite_artists.remove(artist)
-        return Response({"detail": "관심 아티스트에서 해제되었습니다."}, status=status.HTTP_200_OK)
-
-class ListFavoriteArtistsView(APIView): # 관심 아티스트 목록 조회
-    
+class ListFavoriteArtistsView(APIView):
+    """관심 아티스트 리스트 조회"""
     permission_classes = [IsAuthenticated]
 
     def get(self, request):

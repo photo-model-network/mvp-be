@@ -12,7 +12,7 @@ from .views import (
     IdentityVerificationView,
 )
 from .views import (
-    FavoriteArtistView, 
+    FavoriteArtistManageView, 
     ListFavoriteArtistsView
 )
 
@@ -58,7 +58,7 @@ urlpatterns = (
         ),
     ]
     +[  # 관심 아티스트 관련
-        path('accounts/favorite-artist/<str:artist_id>/', FavoriteArtistView.as_view(), name='favorite-artist'),
+        path('accounts/favorite-artists/<str:artist_id>/', FavoriteArtistManageView.as_view(), name='favorite-artists'),
         path('accounts/favorite-artists/', ListFavoriteArtistsView.as_view(), name='list-favorite-artists'),
     ]
 )
