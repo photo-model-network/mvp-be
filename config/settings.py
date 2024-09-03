@@ -158,9 +158,17 @@ if ENV == "development":
 
     CELERY_BROKER_URL = "redis://localhost:6379/0"
 else:
-    import dj_database_url
 
-    DATABASES = {"default": dj_database_url.parse(config("DATABASE_URL", cast=str))}
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": config("DB_NAME"),
+            "USER": config("DB_USER"),
+            "PASSWORD": config("DB_PASSWORD"),
+            "HOST": config("DB_HOST"),
+            "PORT": config("DB_PORT"),
+        }
+    }
 
     CHANNEL_LAYERS = {
         "default": {
