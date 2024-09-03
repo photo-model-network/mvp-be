@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Log in to GitHub Container Registry
-        run: echo ${{ secrets.MADEFFORT_TOKEN }} | docker login ghcr.io --username madeffort --password-stdin
+        run: docker login ghcr.io --username madeffort --password ${{ secrets.MADEFFORT_TOKEN }}
 
       - name: Build and push Docker Image
         run: |
