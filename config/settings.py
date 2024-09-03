@@ -164,11 +164,11 @@ else:
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
-            "NAME": config("DB_NAME"),
-            "USER": config("DB_USER"),
-            "PASSWORD": config("DB_PASSWORD"),
-            "HOST": config("DB_HOST"),
-            "PORT": config("DB_PORT"),
+            "NAME": config("DB_NAME", cast=str),
+            "USER": config("DB_USER", cast=str),
+            "PASSWORD": config("DB_PASSWORD", cast=str),
+            "HOST": config("DB_HOST", cast=str),
+            "PORT": config("DB_PORT", cast=int),
         }
     }
 
