@@ -5,7 +5,7 @@
 dump.rdb
 portone.py
 # Dockerfile
-docker-compose.yml
+# docker-compose.yml
 # .dockerignore
 Procfile
 test.html
