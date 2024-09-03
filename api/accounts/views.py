@@ -3,6 +3,7 @@ import json
 import requests
 from django.conf import settings
 from django.contrib.auth.hashers import make_password
+from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -372,7 +373,6 @@ class BusinessVerificationView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-
         business_num = request.data.get("businessNum")
 
         if not business_num:
@@ -393,9 +393,21 @@ class BusinessVerificationView(APIView):
                     }
                 ),
             )
-            return Response(response.json(), status=status.HTTP_200_OK)
+            response_data = response.json()
 
-        except requests.exceptions.RequestException as e:
+            if response.status_code == 200 and response_data.get("status_code") == "OK":
+                business_info = response_data.get("data", [])[0]
+                if business_info.get("b_stt_cd") == "01":
+                    user = request.user
+                    user.business_license_number = business_num
+                    user.save()
+                    return Response({"message": "사업자 인증이 성공적으로 완료되었습니다."}, status=status.HTTP_200_OK)
+                else:
+                    return Response({"error": "유효하지 않은 사업자등록번호입니다."}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response({"error": "사업자 인증에 실패했습니다."}, status=status.HTTP_400_BAD_REQUEST)
+
+        except requests.exceptions.RequestException:
             return Response(
                 {"error": "네트워크 오류가 발생했습니다."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -418,3 +430,33 @@ class IdentityVerificationView(APIView):
             {"message": "본인인증이 성공적으로 완료되었습니다."},
             status=status.HTTP_200_OK,
         )
+
+
+
+class FavoriteArtistManageView(APIView):
+    """관심 아티스트 등록 및 해제"""
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, artist_id):
+        user = request.user
+        artist = get_object_or_404(User, id=artist_id, is_approved=True)
+
+        if artist == user:
+            return Response({"detail": "자신을 관심 아티스트로 등록할 수 없습니다."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if artist in user.favorite_artists.all():
+            user.favorite_artists.remove(artist)
+            return Response({"detail": "관심 아티스트에서 해제되었습니다."}, status=status.HTTP_200_OK)
+        else:
+            user.favorite_artists.add(artist)
+            return Response({"detail": "관심 아티스트로 등록되었습니다."}, status=status.HTTP_200_OK)
+
+class ListFavoriteArtistsView(APIView):
+    """관심 아티스트 리스트 조회"""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        favorite_artists = user.favorite_artists.all()
+        data = [{"id": artist.id, "name": artist.name, "email": artist.email} for artist in favorite_artists]
+        return Response(data, status=status.HTTP_200_OK)

@@ -14,13 +14,12 @@ from api.packages.serializers import (
     PackageListSerializer,
     PackageDetailSerializer,
 )
-from .permissions import IsPackageProvider
-from api.core.tasks import save_interaction
+from .permissions import IsPackageProvider, IsApprovedArtist
 
 
 class PackageCreateView(CreateAPIView):
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsApprovedArtist]
     serializer_class = PackageCUDSerializer
 
     def perform_create(self, serializer):
