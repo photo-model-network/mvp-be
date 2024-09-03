@@ -11,7 +11,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from drf_yasg.utils import swagger_auto_schema
 from .throttles import SendBankVerificationThrottle
-from .serializers import GoogleSerializer, KakaoSerializer, NaverSerializer
+from .serializers import GoogleSerializer, KakaoSerializer, NaverSerializer, BusinessVerificationSerializer
 from .models import User
 
 import logging
@@ -369,17 +369,18 @@ class ConfirmBankVerificationView(APIView):
 
 class BusinessVerificationView(APIView):
     """국세청 사업자등록정보 유효성검증"""
-
+    
     permission_classes = [IsAuthenticated]
 
+    @swagger_auto_schema(request_body=BusinessVerificationSerializer)
     def post(self, request):
-        business_num = request.data.get("businessNum")
-
-        if not business_num:
-            return Response(
-                {"error": '사업자등록번호를 10자리를  " - " 없이 입력해주세요.'},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        
+        serializer = BusinessVerificationSerializer(data=request.data)
+        
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        business_num = serializer.validated_data["businessNum"]
 
         try:
             response = requests.post(
@@ -397,6 +398,8 @@ class BusinessVerificationView(APIView):
 
             if response.status_code == 200 and response_data.get("status_code") == "OK":
                 business_info = response_data.get("data", [])[0]
+                logger.debug(f"사업자등록정보: {business_info}")
+                
                 if business_info.get("b_stt_cd") == "01":
                     user = request.user
                     user.business_license_number = business_num
