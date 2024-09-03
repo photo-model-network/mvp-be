@@ -140,6 +140,7 @@ ASGI_APPLICATION = "config.asgi.application"
 # CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 
 if ENV == "development":
+
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
@@ -157,6 +158,7 @@ if ENV == "development":
     }
 
     CELERY_BROKER_URL = "redis://localhost:6379/0"
+
 else:
 
     DATABASES = {
