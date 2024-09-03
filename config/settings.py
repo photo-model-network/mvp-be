@@ -145,7 +145,7 @@ if ENV == "production":
         },
     }
 
-#     CELERY_BROKER_URL = config("REDIS_URL", cast=str)
+    CELERY_BROKER_URL = config("REDIS_URL", cast=str)
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 
 # Password validation
