@@ -36,10 +36,9 @@ CORS_ALLOWED_ORIGINS = [
     "https://*",
 ]
 
-site_domain = config("RAILWAY_PUBLIC_DOMAIN", default="")
 
 CSRF_TRUSTED_ORIGINS = [
-    f"https://{site_domain}",
+    "https://*",
 ]
 
 X_FRAME_OPTIONS = "DENY"
