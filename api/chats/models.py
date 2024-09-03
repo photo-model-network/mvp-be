@@ -29,7 +29,9 @@ class Message(models.Model):
     )
     sender = models.ForeignKey(User, on_delete=models.CASCADE)
     message = models.TextField()
+    file = models.FileField(upload_to="chat_files/", null=True, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = "메시지"
@@ -46,5 +48,6 @@ class Message(models.Model):
                 "type": "chat_message",
                 "sender": self.sender.id,
                 "message": self.message,
+                "file_url": self.file.url if self.file else "",
             },
         )
