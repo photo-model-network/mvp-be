@@ -1,5 +1,6 @@
 import shortuuid
 from django.db import models
+from django.db.models import Avg
 from taggit.models import GenericTaggedItemBase, TagBase
 from taggit.managers import TaggableManager
 from api.common.models import CommonModel
@@ -142,6 +143,10 @@ class Package(CommonModel):
     def __str__(self):
         return f"{self.title} : {self.provider}"
 
+    def average_rating(self):
+        avg_rating = self.review_set.aggregate(Avg('rating'))['rating__avg']
+        return avg_rating if avg_rating is not None else 0
+    
     class Meta:
         verbose_name = "패키지"
         verbose_name_plural = "패키지"
