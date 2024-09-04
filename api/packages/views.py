@@ -15,6 +15,7 @@ from api.packages.serializers import (
     PackageDetailSerializer,
 )
 from .permissions import IsPackageProvider, IsApprovedArtist
+from api.core.tasks import save_interaction
 
 
 class PackageCreateView(CreateAPIView):
