@@ -13,6 +13,7 @@ import django
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 django.setup()
 
+from ddtrace.contrib.asgi import TraceMiddleware
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.security.websocket import AllowedHostsOriginValidator
 from django_channels_jwt_auth_middleware.auth import JWTAuthMiddlewareStack
@@ -21,10 +22,13 @@ from api.chats.routing import websocket_urlpatterns
 
 django_asgi_application = get_asgi_application()
 
+# TraceMiddleware로 Django ASGI 애플리케이션을 감쌈
+traced_django_asgi_application = TraceMiddleware(django_asgi_application)
+
 
 application = ProtocolTypeRouter(
     {
-        "http": django_asgi_application,
+        "http": traced_django_asgi_application,
         "websocket": AllowedHostsOriginValidator(
             JWTAuthMiddlewareStack(URLRouter(websocket_urlpatterns))
         ),
