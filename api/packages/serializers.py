@@ -1,5 +1,6 @@
 from api.packages.models import Package, PackagePicture
 from rest_framework.serializers import ModelSerializer, ListField, URLField, ImageField
+from rest_framework import serializers
 from taggit.serializers import TagListSerializerField
 from django.core.files.storage import default_storage
 import os
@@ -52,6 +53,7 @@ class PackageCUDSerializer(ModelSerializer):
 
 
 class PackageListSerializer(ModelSerializer):
+    average_rating = serializers.SerializerMethodField()
 
     class Meta:
         model = Package
@@ -62,10 +64,15 @@ class PackageListSerializer(ModelSerializer):
             "title",
             "thumbnail",
             "summary",
+            "average_rating",
         ]
+        
+    def get_average_rating(self, obj):
+        return obj.average_rating()
 
 
 class PackageDetailSerializer(ModelSerializer):
+    average_rating = serializers.SerializerMethodField()
 
     class Meta:
         model = Package
@@ -77,8 +84,12 @@ class PackageDetailSerializer(ModelSerializer):
             "thumbnail",
             "html_content",
             "policy",
+            "average_rating",
         ]
 
+    def get_average_rating(self, obj):
+        return obj.average_rating()
+    
 
 def save_package_images(images, package):
     if images:
