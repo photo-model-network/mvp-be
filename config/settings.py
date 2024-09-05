@@ -21,13 +21,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
-ENV = config("ENV", default="development")
+ENV = config("ENV", default="development", cast=str)
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config("DJANGO_SECRET", cast=str)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DEBUG", cast=bool)
+
+site_domain = config("RAILWAY_PUBLIC_DOMAIN", default="", cast=str)
 
 ALLOWED_HOSTS = ["*"]
 CORS_ALLOWED_ORIGINS = [
@@ -36,7 +38,6 @@ CORS_ALLOWED_ORIGINS = [
     "https://*",
 ]
 
-site_domain = config("RAILWAY_PUBLIC_DOMAIN", default="")
 
 CSRF_TRUSTED_ORIGINS = [
     f"https://{site_domain}",
@@ -114,38 +115,76 @@ ASGI_APPLICATION = "config.asgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+# Database configuration
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
-}
-
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [("127.0.0.1", 6379)],
-        },
-    },
-}
-
-CELERY_BROKER_URL = "redis://127.0.0.1:6379/0"
 # if ENV == "production":
 #     import dj_database_url
 
-#     DATABASES["default"] = dj_database_url.parse(config("DATABASE_URL", cast=str))
-
-#     CHANNEL_LAYERS = {
+#     DATABASES = {"default": dj_database_url.parse(config("DATABASE_URL", cast=str))}
+# else:
+#     DATABASES = {
 #         "default": {
-#             "BACKEND": "channels_redis.core.RedisChannelLayer",
-#             "CONFIG": {"hosts": config("REDIS_URL", cast=str)},
-#         },
+#             "ENGINE": "django.db.backends.sqlite3",
+#             "NAME": BASE_DIR / "db.sqlite3",
+#         }
 #     }
 
-#     CELERY_BROKER_URL = config("REDIS_URL", cast=str)
+# CHANNEL_LAYERS = {
+#     "default": {
+#         "BACKEND": "channels_redis.core.RedisChannelLayer",
+#         "CONFIG": {
+#             "hosts": [config("REDIS_URL", default="redis://localhost:6379/0", cast=str)]
+#         },
+#     },
+# }
+
+# CELERY_BROKER_URL = config("REDIS_URL", default="redis://localhost:6379/0", cast=str)
 # CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+
+if ENV == "development":
+
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
+
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {
+                "hosts": [("127.0.0.1", 6379)],
+            },
+        },
+    }
+
+    CELERY_BROKER_URL = "redis://localhost:6379/0"
+
+else:
+
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": config("POSTGRES_NAME", cast=str),
+            "USER": config("POSTGRES_USER", cast=str),
+            "PASSWORD": config("POSTGRES_PASSWORD", cast=str),
+            "HOST": config("POSTGRES_HOST", cast=str),
+            "PORT": config("POSTGRES_PORT", cast=int),
+        }
+    }
+
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {"hosts": config("REDIS_URL", cast=str)},
+        },
+    }
+
+    CELERY_BROKER_URL = config("REDIS_URL", cast=str)
+
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators

@@ -1,6 +1,7 @@
 import shortuuid
 from django.db import models
 from django.db.models import Avg
+from shortuuid.django_fields import ShortUUIDField
 from taggit.models import GenericTaggedItemBase, TagBase
 from taggit.managers import TaggableManager
 from api.common.models import CommonModel
@@ -93,7 +94,7 @@ class PackageTaggedItem(GenericTaggedItemBase):
         related_name="%(app_label)s_%(class)s_items",
         on_delete=models.CASCADE,
     )
-    object_id = models.CharField(max_length=22, default=shortuuid.uuid, editable=False)
+    object_id = ShortUUIDField(default=shortuuid.uuid, editable=False)
 
     def __str__(self):
         return f"{self.object_id} : [{self.tag}]"
@@ -115,9 +116,7 @@ class Package(CommonModel):
         PET = ("반려동물", "반려동물")
         BASIC_SHOOTING = ("기본촬영대행", "기본촬영대행")
 
-    id = models.CharField(
-        max_length=22, default=shortuuid.uuid, primary_key=True, editable=False
-    )
+    id = ShortUUIDField(primary_key=True, editable=False)
     # 패키지 카테고리
     category = models.CharField(
         max_length=20, choices=CategoryChoices.choices, default=CategoryChoices.PROFILE
