@@ -185,6 +185,7 @@ else:
 
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 
+
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
 

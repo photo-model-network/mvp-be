@@ -1,5 +1,6 @@
 from api.packages.models import Package, PackagePicture
 from rest_framework.serializers import ModelSerializer, ListField, URLField, ImageField
+from rest_framework import serializers
 from taggit.serializers import TagListSerializerField
 from django.core.files.storage import default_storage
 import os
@@ -62,6 +63,7 @@ class PackageListSerializer(ModelSerializer):
             "title",
             "thumbnail",
             "summary",
+            "average_rating",
         ]
 
 
@@ -77,8 +79,10 @@ class PackageDetailSerializer(ModelSerializer):
             "thumbnail",
             "html_content",
             "policy",
+            "average_rating",
         ]
 
+    
 
 def save_package_images(images, package):
     if images:

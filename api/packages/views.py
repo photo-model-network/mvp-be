@@ -9,6 +9,7 @@ from rest_framework.generics import (
     DestroyAPIView,
 )
 from api.packages.models import Package
+from api.core.tasks import save_interaction
 from api.packages.serializers import (
     PackageCUDSerializer,
     PackageListSerializer,

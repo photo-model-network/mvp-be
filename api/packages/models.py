@@ -1,5 +1,6 @@
 import shortuuid
 from django.db import models
+from django.db.models import Avg
 from shortuuid.django_fields import ShortUUIDField
 from taggit.models import GenericTaggedItemBase, TagBase
 from taggit.managers import TaggableManager
@@ -137,10 +138,19 @@ class Package(CommonModel):
     tags = TaggableManager(through=PackageTaggedItem)
     # 기본 정책 및 사용자 추가 정책
     policy = models.ForeignKey(PackagePolicy, on_delete=models.CASCADE)
-
+    
+    average_rating = models.DecimalField(
+        max_digits=3, decimal_places=1, default=0.0, editable=False
+    )
+    
     def __str__(self):
         return f"{self.title} : {self.provider}"
 
+    def update_average_rating(self):
+        avg_rating = self.review_set.aggregate(Avg('rating'))['rating__avg']
+        self.average_rating = avg_rating if avg_rating is not None else 0
+        self.save(update_fields=['average_rating'])
+    
     class Meta:
         verbose_name = "패키지"
         verbose_name_plural = "패키지"
