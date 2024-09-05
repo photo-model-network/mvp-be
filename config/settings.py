@@ -131,8 +131,7 @@ CHANNEL_LAYERS = {
     },
 }
 
-CELERY_BROKER_URL = "redis://localhost:6379/0"
-
+CELERY_BROKER_URL = "redis://127.0.0.1:6379/0"
 # if ENV == "production":
 #     import dj_database_url
 
@@ -146,7 +145,7 @@ CELERY_BROKER_URL = "redis://localhost:6379/0"
 #     }
 
 #     CELERY_BROKER_URL = config("REDIS_URL", cast=str)
-CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+# CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators

@@ -53,7 +53,6 @@ class PackageCUDSerializer(ModelSerializer):
 
 
 class PackageListSerializer(ModelSerializer):
-    average_rating = serializers.SerializerMethodField()
 
     class Meta:
         model = Package
@@ -66,13 +65,9 @@ class PackageListSerializer(ModelSerializer):
             "summary",
             "average_rating",
         ]
-        
-    def get_average_rating(self, obj):
-        return obj.average_rating()
 
 
 class PackageDetailSerializer(ModelSerializer):
-    average_rating = serializers.SerializerMethodField()
 
     class Meta:
         model = Package
@@ -87,8 +82,6 @@ class PackageDetailSerializer(ModelSerializer):
             "average_rating",
         ]
 
-    def get_average_rating(self, obj):
-        return obj.average_rating()
     
 
 def save_package_images(images, package):

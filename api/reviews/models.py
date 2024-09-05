@@ -21,6 +21,15 @@ class Review(CommonModel):
     def __str__(self):
         return f"{self.customer.username} : {self.comment} ({self.rating}점)"
 
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        self.package.update_average_rating()
+
+    def delete(self, *args, **kwargs):
+        package = self.package
+        super().delete(*args, **kwargs)
+        package.update_average_rating()
+        
     class Meta:
         verbose_name = "리뷰 (촬영 패키지 후기)"
         verbose_name_plural = "리뷰 (촬영 패키지 후기)"
