@@ -12,7 +12,7 @@ from api.accounts.models import User
 from api.timeslots.models import UnavailableTimeSlot
 from .serializers import RequestReservationSerializer, PayReservationSerializer
 from .models import Reservation, ReservationOption
-
+from .permissions import IsReservationPackageProvider
 
 import logging
 
@@ -139,16 +139,18 @@ class RequestReservationView(APIView):
 class ConfirmReservationView(APIView):
     """(판매자가 들어온 예약을 확인하여) 예약 확정"""
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsReservationPackageProvider]
 
     def post(self, request, reservation_id):
         reservation = get_object_or_404(Reservation, id=reservation_id)
 
-        if not request.user == reservation.package.provider:
-            return Response(
-                {"message": "예약을 확정할 권한이 없습니다."},
-                status=status.HTTP_403_FORBIDDEN,
-            )
+        self.check_object_permissions(request, reservation)
+
+        # if not request.user == reservation.package.provider:
+        #     return Response(
+        #         {"message": "예약을 확정할 권한이 없습니다."},
+        #         status=status.HTTP_403_FORBIDDEN,
+        #     )
 
         if reservation.status == reservation.ReservationStatus.PENDING:
             reservation.confirm()
