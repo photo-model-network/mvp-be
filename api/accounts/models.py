@@ -1,6 +1,7 @@
 import shortuuid
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from shortuuid.django_fields import ShortUUIDField
 
 
 class User(AbstractUser):
@@ -10,9 +11,7 @@ class User(AbstractUser):
         BUSINESS = ("개인사업자", "개인사업자")
         CORPORATE = ("법인사업자", "법인사업자")
 
-    id = models.CharField(
-        max_length=22, default=shortuuid.uuid, primary_key=True, editable=False
-    )
+    id = ShortUUIDField(primary_key=True, editable=False)
     name = models.CharField(max_length=100, default="익명의 사용자")
     avatar = models.URLField(
         default="https://cdn-icons-png.flaticon.com/512/149/149071.png", blank=True
@@ -53,6 +52,9 @@ class User(AbstractUser):
     # 스튜디오 보유 여부
     has_studio = models.BooleanField(default=False)
 
+     # 관심 아티스트
+    favorite_artists = models.ManyToManyField('self', symmetrical=False, related_name='favorited_by', blank=True)
+    
     def save(self, *args, **kwargs):
         # 아바타가 없을 경우 기본 이미지 저장
         if not self.avatar:

@@ -9,18 +9,19 @@ from rest_framework.generics import (
     DestroyAPIView,
 )
 from api.packages.models import Package
+from api.core.tasks import save_interaction
 from api.packages.serializers import (
     PackageCUDSerializer,
     PackageListSerializer,
     PackageDetailSerializer,
 )
-from .permissions import IsPackageProvider
+from .permissions import IsPackageProvider, IsApprovedArtist
 from api.core.tasks import save_interaction
 
 
 class PackageCreateView(CreateAPIView):
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsApprovedArtist]
     serializer_class = PackageCUDSerializer
 
     def perform_create(self, serializer):
