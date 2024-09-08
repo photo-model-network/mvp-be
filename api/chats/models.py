@@ -26,8 +26,8 @@ class Message(models.Model):
         ChatRoom, on_delete=models.CASCADE, related_name="messages"
     )
     sender = models.ForeignKey(User, on_delete=models.CASCADE)
-    message = models.TextField()
-    file = models.FileField(upload_to="chat_files/", null=True, blank=True)
+    message = models.TextField(blank=True)
+    file = models.FileField(null=True, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
 
