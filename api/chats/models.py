@@ -1,3 +1,5 @@
+import uuid
+import os
 from django.db import models
 from asgiref.sync import async_to_sync
 from shortuuid.django_fields import ShortUUIDField
@@ -5,6 +7,10 @@ from channels.layers import get_channel_layer
 from api.common.models import CommonModel
 from api.accounts.models import User
 
+def upload_to_uuid(instance, filename):
+    ext = filename.split(".")[-1]
+    new_filename = f"{uuid.uuid4()}.{ext}"
+    return os.path.join(new_filename)
 
 class ChatRoom(CommonModel):
     id = ShortUUIDField(primary_key=True, editable=False)
@@ -27,7 +33,7 @@ class Message(models.Model):
     )
     sender = models.ForeignKey(User, on_delete=models.CASCADE)
     message = models.TextField(blank=True)
-    file = models.FileField(null=True, blank=True)
+    file = models.FileField(upload_to=upload_to_uuid, null=True, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
 
