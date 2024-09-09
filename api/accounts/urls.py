@@ -11,7 +11,7 @@ from .views import (
     BusinessVerificationView,
     IdentityVerificationView,
 )
-from .views import FavoriteArtistManageView, ListFavoriteArtistsView, RegisterView, CustomLoginView, DeleteAccountView, ChangePasswordView
+from .views import FavoriteArtistManageView, ListFavoriteArtistsView, RegisterView, LoginView, DeleteAccountView, ChangePasswordView
 
 urlpatterns = (
     [
@@ -69,7 +69,7 @@ urlpatterns = (
     + [
         # 자체 로그인 및 회원 탈퇴
         path('accounts/register/', RegisterView.as_view(), name='register'),
-        path('accounts/login/', CustomLoginView.as_view(), name='login'),
+        path('accounts/login/', LoginView.as_view(), name='login'),
         path('accounts/delete-account/', DeleteAccountView.as_view(), name='delete_account'),
         path('accounts/change-password/', ChangePasswordView.as_view(), name='change_password'),    
     ]

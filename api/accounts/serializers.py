@@ -1,9 +1,11 @@
 from rest_framework import serializers
-from django.contrib.auth import authenticate
-from django.core.validators import RegexValidator
+from django.core.validators import RegexValidator, EmailValidator
 from .models import User
 
 class RegisterSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(validators=[
+        EmailValidator(message="유효한 이메일 주소를 입력해주세요.")
+    ])
     password = serializers.CharField(write_only=True, validators=[
         RegexValidator(
             regex='^(?=.*[A-Z])(?=.*\d).{8,}$',
@@ -13,7 +15,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['username', 'password', 'name', 'email', 'real_name', 'phone_number']
+        fields = ['username', 'password']
     
     def validate_username(self, value):
         if User.objects.filter(username=value).exists():
@@ -24,10 +26,6 @@ class RegisterSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(
             username=validated_data['username'],
             password=validated_data['password'],
-            name=validated_data.get('name', '익명의 사용자'),
-            email=validated_data['email'],
-            real_name=validated_data.get('real_name', ''),
-            phone_number=validated_data.get('phone_number', '')
         )
         return user
 
@@ -35,39 +33,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField(write_only=True)
-    user = serializers.SerializerMethodField()
-
-    def get_user(self, obj):
-        user = self.context.get('user')
-        if user:
-            return {
-                'id': user.id,
-                'username': user.username,
-                'name': user.name,
-                'avatar': user.avatar,
-                'email': user.email,
-                'type': user.type,
-                'is_approved': user.is_approved,
-                'real_name': user.real_name,
-                'phone_number': user.phone_number,
-                'is_identified': user.is_identified,
-                'bank_account': user.bank_account,
-                'bank_code': user.bank_code,
-                'bank_verified': user.bank_verified,
-                'business_license_number': user.business_license_number,
-                'is_business': user.is_business,
-                'has_studio': user.has_studio,
-            }
-        return None
-
-    def validate(self, data):
-        username = data.get('username')
-        password = data.get('password')
-        user = authenticate(username=username, password=password)
-        if user and user.is_active:
-            self.context['user'] = user
-            return data
-        raise serializers.ValidationError("유효하지 않은 자격 증명입니다.")
+    
 
 
 class ChangePasswordSerializer(serializers.Serializer):

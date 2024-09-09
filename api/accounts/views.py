@@ -31,7 +31,7 @@ class RegisterView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 
-class CustomLoginView(APIView):
+class LoginView(APIView):
     """자체 로그인"""
 
     permission_classes = [AllowAny]
@@ -39,13 +39,16 @@ class CustomLoginView(APIView):
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
-            user = serializer.context.get('user')
-            login(request, user)
-            return Response({
-                "message": "로그인에 성공했습니다.",
-                "user": serializer.get_user(user)
-            }, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            user = User.objects.get(
+                username=serializer.validated_data["username"],
+            )
+            refresh = RefreshToken.for_user(user)
+            # 로그인 성공시 토큰 반환
+            return Response(
+                {"refresh": str(refresh), "access": str(refresh.access_token)},
+                status=status.HTTP_200_OK,
+            )
+
 
 class DeleteAccountView(APIView):
     """자체로그인 계정 삭제"""
