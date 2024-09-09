@@ -1,20 +1,37 @@
-from api.packages.models import Package, PackagePicture
-from rest_framework.serializers import ModelSerializer, ListField, URLField, ImageField
-from rest_framework import serializers
-from taggit.serializers import TagListSerializerField
+import os, uuid
 from django.core.files.storage import default_storage
-import os
-import uuid
+from rest_framework import serializers
+from rest_framework.serializers import ModelSerializer, ListField, URLField, ImageField
+from taggit.serializers import TagListSerializerField
+from api.packages.models import Package, PackagePicture
+
+
+def save_images(images, package):
+    image_objects = []
+    for image in images:
+        ext = os.path.splitext(image.name)[1]
+        new_filename = os.path.join(
+            f"packages/{package.id}/images", f"{uuid.uuid4()}{ext}"
+        )
+        default_storage.save(new_filename, image)
+        image_objects.append(PackagePicture(package=package, image=new_filename))
+    PackagePicture.objects.bulk_create(image_objects)
+
+
+def save_thumbnail(thumbnail, package):
+    ext = os.path.splitext(thumbnail.name)[1]
+    new_filename = os.path.join(
+        f"packages/{package.id}/thumbnail", f"{uuid.uuid4()}{ext}"
+    )
+    default_storage.save(new_filename, thumbnail)
+    package.thumbnail = new_filename
+    package.save()
 
 
 class PackageCUDSerializer(ModelSerializer):
-    images = ListField(
-        child=ImageField(),
-        write_only=True,
-    )
+    images = ListField(child=ImageField(), write_only=True, required=True)
     thumbnail = ImageField(required=True)
     tags = TagListSerializerField(required=False)
-
 
     class Meta:
         model = Package
@@ -24,32 +41,35 @@ class PackageCUDSerializer(ModelSerializer):
             "provider_info",
             "title",
             "thumbnail",
+            "images",
             "html_content",
             "policy",
             "tags",
-            "images",
         ]
-       
+
     def create(self, validated_data):
-        validated_data['provider'] = self.context.get('request').user
-        images = validated_data.pop('images', None)
-        thumbnail = validated_data.pop('thumbnail', None)
-        tags = validated_data.pop('tags', [])
-        tags_v = [t.strip() for t in tags[0].split(",") if t.strip()]
-        
+
+        images = validated_data.pop("images", None)
+        thumbnail = validated_data.pop("thumbnail", None)
+        tags = validated_data.pop("tags", [])
+
+        # 나머지 데이터를 이용해 패키지 생성
         package = super().create(validated_data)
-        
-        save_thumbnail(thumbnail, package)
-        save_package_images(images, package)
-        
-        for tag in tags_v:
-            package.tags.add(tag)
+
+        # 태그 처리
+        if tags:
+            tag_list = [tag.strip() for tag in tags[0].split(",") if tag.strip()]
+            package.tags.add(*tag_list)
+
+        # 썸네일 저장 처리 (필요하다면 별도의 함수로 처리)
+        if thumbnail:
+            save_thumbnail(thumbnail, package)
+
+        # 이미지 저장 처리 (필요하다면 별도의 함수로 처리)
+        if images:
+            save_images(images, package)
+
         return package
-
-
-    """
-    validated_data에서 tags필드를 분리하여 tags 리스트를 가져올 때 사용.(보류)
-    """
 
 
 class PackageListSerializer(ModelSerializer):
@@ -81,28 +101,3 @@ class PackageDetailSerializer(ModelSerializer):
             "policy",
             "average_rating",
         ]
-
-    
-
-def save_package_images(images, package):
-    if images:
-        for image in images:
-            original_filename = image.name
-            ext = os.path.splitext(image.name)[1]  # 파일 확장자 추출
-            unique_filename = f"{uuid.uuid4()}{ext}"  # 파일명 중복 방지를 위한 유니크한 파일명 생성
-            default_storage.save(unique_filename, image)  # 파일 저장
-            PackagePicture.objects.create(
-                package = package,
-                original_url = original_filename,
-                store_url = unique_filename
-            )
-            
-def save_thumbnail(thumbnail, package):
-    if thumbnail:
-        original_filename = thumbnail.name
-        ext = os.path.splitext(thumbnail.name)[1]
-        unique_filename = f"{uuid.uuid4()}{ext}"  # 파일명 중복 방지를 위한 유니크한 파일명 생성
-        default_storage.save(unique_filename, thumbnail)  # 파일 저장
-        package.thumbnail = original_filename
-        package.thumbnail_store_url = unique_filename
-        package.save()

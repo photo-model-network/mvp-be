@@ -1,7 +1,15 @@
-import shortuuid
+import os, shortuuid
+import requests
 from django.db import models
+from django.core.files.base import ContentFile
 from django.contrib.auth.models import AbstractUser
 from shortuuid.django_fields import ShortUUIDField
+
+
+def save_user_avatar(instance, filename):
+    ext = filename.split(".")[-1]
+    new_filename = f"{shortuuid.uuid()}.{ext}"
+    return os.path.join(f"users/{instance.id}/avatar", new_filename)
 
 
 class User(AbstractUser):
@@ -13,9 +21,7 @@ class User(AbstractUser):
 
     id = ShortUUIDField(primary_key=True, editable=False)
     name = models.CharField(max_length=100, default="익명의 사용자")
-    avatar = models.URLField(
-        default="https://cdn-icons-png.flaticon.com/512/149/149071.png", blank=True
-    )
+    avatar = models.ImageField(upload_to=save_user_avatar, blank=True)
     # 한줄 소개
     bio = models.TextField(
         default="안녕하세요, 저의 프로필에 방문해주셔서 감사합니다.", blank=True
@@ -60,7 +66,14 @@ class User(AbstractUser):
     def save(self, *args, **kwargs):
         # 아바타가 없을 경우 기본 이미지 저장
         if not self.avatar:
-            self.avatar = "https://cdn-icons-png.flaticon.com/512/149/149071.png"
+            response = requests.get(
+                "https://cdn-icons-png.flaticon.com/512/149/149071.png"
+            )
+            if response.status_code == 200:
+                # ContentFile에 다운로드한 이미지를 저장한 뒤, 아바타 필드에 저장
+                self.avatar.save(
+                    "default_avatar.png", ContentFile(response.content), save=False
+                )
         super().save(*args, **kwargs)
 
     def __str__(self):
