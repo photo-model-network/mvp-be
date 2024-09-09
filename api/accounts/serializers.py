@@ -3,6 +3,7 @@ from django.core.validators import RegexValidator, EmailValidator
 from .models import User
 
 class RegisterSerializer(serializers.ModelSerializer):
+    
     username = serializers.CharField(validators=[
         EmailValidator(message="유효한 이메일 주소를 입력해주세요.")
     ])
@@ -13,10 +14,6 @@ class RegisterSerializer(serializers.ModelSerializer):
         )
     ])
 
-    class Meta:
-        model = User
-        fields = ['username', 'password']
-    
     def validate_username(self, value):
         if User.objects.filter(username=value).exists():
             raise serializers.ValidationError("이미 존재하는 사용자 이름입니다.")
@@ -29,6 +26,9 @@ class RegisterSerializer(serializers.ModelSerializer):
         )
         return user
 
+    class Meta:
+        model = User
+        fields = ['username', 'password']
 
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
