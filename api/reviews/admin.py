@@ -4,4 +4,4 @@ from .models import Review
 
 @admin.register(Review)
 class ReviewAdmin(admin.ModelAdmin):
-    list_display = ["package", "customer", "comment", "updated_at"]
+    list_display = ["package", "rating", "customer", "comment", "updated_at"]
