@@ -7,12 +7,13 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from api.packages.permissions import IsPackageProvider
 from api.packages.models import Package, PackageOption
 from api.accounts.models import User
 from api.timeslots.models import UnavailableTimeSlot
 from .serializers import RequestReservationSerializer, PayReservationSerializer
 from .models import Reservation, ReservationOption
-from .permissions import IsReservationPackageProvider
+
 
 import logging
 
@@ -139,12 +140,12 @@ class RequestReservationView(APIView):
 class ConfirmReservationView(APIView):
     """(판매자가 들어온 예약을 확인하여) 예약 확정"""
 
-    permission_classes = [IsAuthenticated, IsReservationPackageProvider]
+    permission_classes = [IsAuthenticated, IsPackageProvider]
 
     def post(self, request, reservation_id):
         reservation = get_object_or_404(Reservation, id=reservation_id)
 
-        self.check_object_permissions(request, reservation)
+        self.check_object_permissions(request, reservation.package)
 
         # if not request.user == reservation.package.provider:
         #     return Response(
