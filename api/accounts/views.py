@@ -11,7 +11,9 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from drf_yasg.utils import swagger_auto_schema
 from .throttles import SendBankVerificationThrottle
-from .serializers import GoogleSerializer, KakaoSerializer, NaverSerializer, BusinessVerificationSerializer, LoginSerializer, RegisterSerializer, ChangePasswordSerializer
+from .serializers import GoogleSerializer, KakaoSerializer, NaverSerializer
+from .serializers import BusinessVerificationSerializer
+from .serializers import LoginSerializer, RegisterSerializer, ChangePasswordSerializer
 from .models import User
 
 import logging

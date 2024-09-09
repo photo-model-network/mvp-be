@@ -11,7 +11,8 @@ from .views import (
     BusinessVerificationView,
     IdentityVerificationView,
 )
-from .views import FavoriteArtistManageView, ListFavoriteArtistsView, RegisterView, LoginView, DeleteAccountView, ChangePasswordView
+from .views import RegisterView, LoginView, DeleteAccountView, ChangePasswordView
+from .views import FavoriteArtistManageView, ListFavoriteArtistsView
 
 urlpatterns = (
     [
