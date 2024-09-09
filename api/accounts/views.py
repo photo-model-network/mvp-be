@@ -20,6 +20,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class RegisterView(APIView):
     """자체 회원가입"""
 
@@ -29,9 +30,11 @@ class RegisterView(APIView):
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response({"message": "회원가입에 성공했습니다."}, status=status.HTTP_201_CREATED)
+            return Response(
+                {"message": "회원가입에 성공했습니다."}, status=status.HTTP_201_CREATED
+            )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+
 
 class LoginView(APIView):
     """자체 로그인"""
@@ -40,16 +43,24 @@ class LoginView(APIView):
 
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
+
         if serializer.is_valid():
-            user = User.objects.get(
-                username=serializer.validated_data["username"],
-            )
-            refresh = RefreshToken.for_user(user)
-            # 로그인 성공시 토큰 반환
-            return Response(
-                {"refresh": str(refresh), "access": str(refresh.access_token)},
-                status=status.HTTP_200_OK,
-            )
+            username = serializer.validated_data["username"]
+            password = serializer.validated_data["password"]
+
+            user = authenticate(username=username, password=password)
+
+            if user is not None:
+                refresh = RefreshToken.for_user(user)
+                return Response(
+                    {"refresh": str(refresh), "access": str(refresh.access_token)},
+                    status=status.HTTP_200_OK,
+                )
+            else:
+                return Response(
+                    {"error": "아이디 또는 비밀번호가 올바르지 않습니다."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
 
 class DeleteAccountView(APIView):
@@ -61,8 +72,10 @@ class DeleteAccountView(APIView):
         user = request.user
         user.delete()
         logout(request)
-        return Response({"message": "회원 탈퇴가 완료되었습니다."}, status=status.HTTP_200_OK)
-    
+        return Response(
+            {"message": "회원 탈퇴가 완료되었습니다."}, status=status.HTTP_200_OK
+        )
+
 
 class ChangePasswordView(APIView):
     """비밀번호 변경"""
@@ -70,12 +83,17 @@ class ChangePasswordView(APIView):
     permission_classes = [IsAuthenticated]
 
     def put(self, request):
-        serializer = ChangePasswordSerializer(data=request.data, context={'request': request})
+        serializer = ChangePasswordSerializer(
+            data=request.data, context={"request": request}
+        )
         if serializer.is_valid():
             serializer.save()
-            return Response({"message": "비밀번호가 성공적으로 변경되었습니다."}, status=status.HTTP_200_OK)
+            return Response(
+                {"message": "비밀번호가 성공적으로 변경되었습니다."},
+                status=status.HTTP_200_OK,
+            )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+
 
 class GoogleView(APIView):
     """구글 소셜 연동 회원가입 및 로그인"""
@@ -427,17 +445,17 @@ class ConfirmBankVerificationView(APIView):
 
 class BusinessVerificationView(APIView):
     """국세청 사업자등록정보 유효성검증"""
-    
+
     permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(request_body=BusinessVerificationSerializer)
     def post(self, request):
-        
+
         serializer = BusinessVerificationSerializer(data=request.data)
-        
+
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
+
         business_num = serializer.validated_data["businessNum"]
 
         try:
@@ -457,16 +475,25 @@ class BusinessVerificationView(APIView):
             if response.status_code == 200 and response_data.get("status_code") == "OK":
                 business_info = response_data.get("data", [])[0]
                 logger.debug(f"사업자등록정보: {business_info}")
-                
+
                 if business_info.get("b_stt_cd") == "01":
                     user = request.user
                     user.business_license_number = business_num
                     user.save()
-                    return Response({"message": "사업자 인증이 성공적으로 완료되었습니다."}, status=status.HTTP_200_OK)
+                    return Response(
+                        {"message": "사업자 인증이 성공적으로 완료되었습니다."},
+                        status=status.HTTP_200_OK,
+                    )
                 else:
-                    return Response({"error": "유효하지 않은 사업자등록번호입니다."}, status=status.HTTP_400_BAD_REQUEST)
+                    return Response(
+                        {"error": "유효하지 않은 사업자등록번호입니다."},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
             else:
-                return Response({"error": "사업자 인증에 실패했습니다."}, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {"error": "사업자 인증에 실패했습니다."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
 
         except requests.exceptions.RequestException:
             return Response(
@@ -493,9 +520,9 @@ class IdentityVerificationView(APIView):
         )
 
 
-
 class FavoriteArtistManageView(APIView):
     """관심 아티스트 등록 및 해제"""
+
     permission_classes = [IsAuthenticated]
 
     def post(self, request, artist_id):
@@ -503,21 +530,34 @@ class FavoriteArtistManageView(APIView):
         artist = get_object_or_404(User, id=artist_id, is_approved=True)
 
         if artist == user:
-            return Response({"detail": "자신을 관심 아티스트로 등록할 수 없습니다."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"detail": "자신을 관심 아티스트로 등록할 수 없습니다."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         if artist in user.favorite_artists.all():
             user.favorite_artists.remove(artist)
-            return Response({"detail": "관심 아티스트에서 해제되었습니다."}, status=status.HTTP_200_OK)
+            return Response(
+                {"detail": "관심 아티스트에서 해제되었습니다."},
+                status=status.HTTP_200_OK,
+            )
         else:
             user.favorite_artists.add(artist)
-            return Response({"detail": "관심 아티스트로 등록되었습니다."}, status=status.HTTP_200_OK)
+            return Response(
+                {"detail": "관심 아티스트로 등록되었습니다."}, status=status.HTTP_200_OK
+            )
+
 
 class ListFavoriteArtistsView(APIView):
     """관심 아티스트 리스트 조회"""
+
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
         user = request.user
         favorite_artists = user.favorite_artists.all()
-        data = [{"id": artist.id, "name": artist.name, "email": artist.email} for artist in favorite_artists]
+        data = [
+            {"id": artist.id, "name": artist.name, "email": artist.email}
+            for artist in favorite_artists
+        ]
         return Response(data, status=status.HTTP_200_OK)
