@@ -2,7 +2,7 @@ import re
 import json
 import requests
 from django.conf import settings
-from django.contrib.auth.hashers import make_password
+from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.views import APIView
@@ -11,13 +11,71 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from drf_yasg.utils import swagger_auto_schema
 from .throttles import SendBankVerificationThrottle
-from .serializers import GoogleSerializer, KakaoSerializer, NaverSerializer, BusinessVerificationSerializer
+from .serializers import GoogleSerializer, KakaoSerializer, NaverSerializer
+from .serializers import BusinessVerificationSerializer
+from .serializers import LoginSerializer, RegisterSerializer, ChangePasswordSerializer
 from .models import User
 
 import logging
 
 logger = logging.getLogger(__name__)
 
+class RegisterView(APIView):
+    """자체 회원가입"""
+
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = RegisterSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "회원가입에 성공했습니다."}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+class LoginView(APIView):
+    """자체 로그인"""
+
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = LoginSerializer(data=request.data)
+        if serializer.is_valid():
+            user = User.objects.get(
+                username=serializer.validated_data["username"],
+            )
+            refresh = RefreshToken.for_user(user)
+            # 로그인 성공시 토큰 반환
+            return Response(
+                {"refresh": str(refresh), "access": str(refresh.access_token)},
+                status=status.HTTP_200_OK,
+            )
+
+
+class DeleteAccountView(APIView):
+    """자체로그인 계정 삭제"""
+
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request):
+        user = request.user
+        user.delete()
+        logout(request)
+        return Response({"message": "회원 탈퇴가 완료되었습니다."}, status=status.HTTP_200_OK)
+    
+
+class ChangePasswordView(APIView):
+    """비밀번호 변경"""
+
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request):
+        serializer = ChangePasswordSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "비밀번호가 성공적으로 변경되었습니다."}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
 
 class GoogleView(APIView):
     """구글 소셜 연동 회원가입 및 로그인"""
