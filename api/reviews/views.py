@@ -8,26 +8,15 @@ from rest_framework.generics import (
     UpdateAPIView,
     DestroyAPIView,
 )
-from rest_framework.exceptions import PermissionDenied
-from api.reservations.models import Reservation
-from .permissions import IsReviewAuthor
+from .permissions import IsReviewAuthor, HasPurchased
 
 
 class ReviewCreateView(CreateAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, HasPurchased]
     serializer_class = ReviewCRUDSerializer
 
     def perform_create(self, serializer):
         package = Package.objects.only("id").get(id=self.kwargs["package_id"])
-
-        has_purchased = Reservation.objects.filter(
-            package=package,
-            customer=self.request.user,
-        ).exists()
-
-        if not has_purchased:
-            raise PermissionDenied("리뷰를 달기 위해서는 패키지를 신청하셔야 합니다.")
-
         serializer.save(package=package, customer=self.request.user)
 
 

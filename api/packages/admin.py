@@ -19,7 +19,7 @@ class PackageOptionInline(admin.TabularInline):
 class PackageAdmin(admin.ModelAdmin):
     inlines = [PackageOptionInline]
 
-    list_display = ["id", "provider", "title", "created_at"]
+    list_display = ["id", "provider", "title", "average_rating", "created_at"]
 
 
 @admin.register(PackageProvider)
