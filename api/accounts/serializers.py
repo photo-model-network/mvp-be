@@ -3,7 +3,7 @@ from django.core.validators import RegexValidator, EmailValidator
 from .models import User
 
 class RegisterSerializer(serializers.ModelSerializer):
-    
+
     username = serializers.CharField(validators=[
         EmailValidator(message="유효한 이메일 주소를 입력해주세요.")
     ])
@@ -31,8 +31,8 @@ class RegisterSerializer(serializers.ModelSerializer):
         fields = ['username', 'password']
 
 class LoginSerializer(serializers.Serializer):
-    username = serializers.CharField()
-    password = serializers.CharField(write_only=True)
+    username = serializers.CharField(required=True)
+    password = serializers.CharField(write_only=True, required=True)
     
 
 
