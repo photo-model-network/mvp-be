@@ -11,7 +11,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from drf_yasg.utils import swagger_auto_schema
 from .throttles import SendBankVerificationThrottle
-from .serializers import GoogleSerializer, KakaoSerializer, NaverSerializer, BusinessVerificationSerializer, LoginSerializer, RegisterSerializer
+from .serializers import GoogleSerializer, KakaoSerializer, NaverSerializer, BusinessVerificationSerializer, LoginSerializer, RegisterSerializer, ChangePasswordSerializer
 from .models import User
 
 import logging
@@ -57,6 +57,19 @@ class DeleteAccountView(APIView):
         user.delete()
         logout(request)
         return Response({"message": "회원 탈퇴가 완료되었습니다."}, status=status.HTTP_200_OK)
+    
+
+class ChangePasswordView(APIView):
+    """비밀번호 변경"""
+
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request):
+        serializer = ChangePasswordSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "비밀번호가 성공적으로 변경되었습니다."}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 
 class GoogleView(APIView):
