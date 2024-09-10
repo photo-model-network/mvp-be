@@ -1,11 +1,13 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
-from api.accounts.models import User
+from django.contrib.auth import get_user_model
 from .models import ChatRoom, Message
 
 
 import logging
+
+User = get_user_model()
 
 logger = logging.getLogger(__name__)
 
@@ -45,26 +47,33 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data):
         data = json.loads(text_data)
         message = data["message"]
+        file_url = data.get("file_url", "")
 
-        await self.save_message(self.user, self.room, message)
+        if message:
+            await self.save_message(self.user, self.room, message, "")
+        elif file_url:
+            await self.save_message(self.user, self.room, "", file_url)
 
         await self.channel_layer.group_send(
             self.room_group_name,
             {
                 "type": "chat_message",
                 "message": message,
+                "file_url": file_url,
                 "sender": self.user.id,
             },
         )
 
     async def chat_message(self, event):
         message = event["message"]
+        file_url = event["file_url"]
         sender = event["sender"]
 
         await self.send(
             text_data=json.dumps(
                 {
                     "message": message,
+                    "file_url": file_url,
                     "sender": sender,
                 }
             )
@@ -93,5 +102,5 @@ class ChatConsumer(AsyncWebsocketConsumer):
             return room
 
     @database_sync_to_async
-    def save_message(self, sender, room, message):
-        return Message.objects.create(sender=sender, room=room, message=message)
+    def save_message(self, sender, room, message, file_url):
+        return Message.objects.create(sender=sender, room=room, message=message, file=file_url)

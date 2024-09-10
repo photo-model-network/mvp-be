@@ -51,9 +51,11 @@ class User(AbstractUser):
     # 스튜디오 보유 여부
     has_studio = models.BooleanField(default=False)
 
-     # 관심 아티스트
-    favorite_artists = models.ManyToManyField('self', symmetrical=False, related_name='favorited_by', blank=True)
-    
+    # 관심 아티스트
+    favorite_artists = models.ManyToManyField(
+        "self", symmetrical=False, related_name="favorited_by", blank=True
+    )
+
     def save(self, *args, **kwargs):
         # 아바타가 없을 경우 기본 이미지 저장
         if not self.avatar:
@@ -70,4 +72,4 @@ class User(AbstractUser):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return self.email
+        return self.username

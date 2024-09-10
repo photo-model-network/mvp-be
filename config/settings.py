@@ -117,30 +117,6 @@ ASGI_APPLICATION = "config.asgi.application"
 
 # Database configuration
 
-# if ENV == "production":
-#     import dj_database_url
-
-#     DATABASES = {"default": dj_database_url.parse(config("DATABASE_URL", cast=str))}
-# else:
-#     DATABASES = {
-#         "default": {
-#             "ENGINE": "django.db.backends.sqlite3",
-#             "NAME": BASE_DIR / "db.sqlite3",
-#         }
-#     }
-
-# CHANNEL_LAYERS = {
-#     "default": {
-#         "BACKEND": "channels_redis.core.RedisChannelLayer",
-#         "CONFIG": {
-#             "hosts": [config("REDIS_URL", default="redis://localhost:6379/0", cast=str)]
-#         },
-#     },
-# }
-
-# CELERY_BROKER_URL = config("REDIS_URL", default="redis://localhost:6379/0", cast=str)
-# CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
-
 if ENV == "development":
 
     DATABASES = {
@@ -177,7 +153,9 @@ else:
     CHANNEL_LAYERS = {
         "default": {
             "BACKEND": "channels_redis.core.RedisChannelLayer",
-            "CONFIG": {"hosts": config("REDIS_URL", cast=str)},
+            "CONFIG": {
+                "hosts": [config("REDIS_URL", cast=str)],
+            },
         },
     }
 
@@ -221,15 +199,24 @@ KST = timezone(TIME_ZONE)
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
+import os
+
 STATIC_URL = "/static/"
-# STATICFILES_DIRS = [BASE_DIR / "static"]
+# STATICFILES_DIRS = [
+#     os.path.join(BASE_DIR, "static"),
+# ]
 # STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # if not DEBUG:
 #     STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-# MEDIA_ROOT = BASE_DIR / "uploads"
 # MEDIA_URL = "/uploads/"
+# MEDIA_ROOT = os.path.join(BASE_DIR, "uploads")
+
+
+# DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
+# STATICFILES_STORAGE = "django.core.files.storage.FileSystemStorage"
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
@@ -255,32 +242,32 @@ APICK_SECRET = config("APICK_SECRET", cast=str)
 NTS_SECRET = config("NTS_SECRET", cast=str)
 
 
-# AWS_S3_REGION_NAME = "auto"
-# CLOUDFLARE_R2_BUCKET_NAME = config("CLOUDFLARE_R2_BUCKET_NAME", cast=str)
-# CLOUDFLARE_R2_ACCESS = config("CLOUDFLARE_R2_ACCESS", cast=str)
-# CLOUDFLARE_R2_SECRET = config("CLOUDFLARE_R2_SECRET", cast=str)
-# CLOUDFLARE_R2_ENDPOINT = config("CLOUDFLARE_R2_ENDPOINT", cast=str)
+AWS_S3_REGION_NAME = "auto"
+CLOUDFLARE_R2_BUCKET_NAME = config("CLOUDFLARE_R2_BUCKET_NAME", cast=str)
+CLOUDFLARE_R2_ACCESS = config("CLOUDFLARE_R2_ACCESS", cast=str)
+CLOUDFLARE_R2_SECRET = config("CLOUDFLARE_R2_SECRET", cast=str)
+CLOUDFLARE_R2_ENDPOINT = config("CLOUDFLARE_R2_ENDPOINT", cast=str)
 
 
-# CLOUDFLARE_R2_CONFIG_OPTIONS = {
-#     "bucket_name": CLOUDFLARE_R2_BUCKET_NAME,
-#     "access_key": CLOUDFLARE_R2_ACCESS,
-#     "secret_key": CLOUDFLARE_R2_SECRET,
-#     "endpoint_url": CLOUDFLARE_R2_ENDPOINT,
-#     "default_acl": "public-read",
-#     "signature_version": "s3v4",
-# }
+CLOUDFLARE_R2_CONFIG_OPTIONS = {
+    "bucket_name": CLOUDFLARE_R2_BUCKET_NAME,
+    "access_key": CLOUDFLARE_R2_ACCESS,
+    "secret_key": CLOUDFLARE_R2_SECRET,
+    "endpoint_url": CLOUDFLARE_R2_ENDPOINT,
+    "default_acl": "public-read",
+    "signature_version": "s3v4",
+}
 
-# STORAGES = {
-#     "default": {
-#         "BACKEND": "api.helpers.cloudflare.storages.MediaFileStorage",
-#         "OPTIONS": CLOUDFLARE_R2_CONFIG_OPTIONS,
-#     },
-#     "staticfiles": {
-#         "BACKEND": "api.helpers.cloudflare.storages.StaticFileStorage",
-#         "OPTIONS": CLOUDFLARE_R2_CONFIG_OPTIONS,
-#     },
-# }
+STORAGES = {
+    "default": {
+        "BACKEND": "api.helpers.cloudflare.storages.MediaFileStorage",
+        "OPTIONS": CLOUDFLARE_R2_CONFIG_OPTIONS,
+    },
+    "staticfiles": {
+        "BACKEND": "api.helpers.cloudflare.storages.StaticFileStorage",
+        "OPTIONS": CLOUDFLARE_R2_CONFIG_OPTIONS,
+    },
+}
 
 # REST Simple JWT 설정
 
