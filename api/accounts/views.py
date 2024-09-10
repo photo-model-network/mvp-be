@@ -521,3 +521,18 @@ class ListFavoriteArtistsView(APIView):
         favorite_artists = user.favorite_artists.all()
         data = [{"id": artist.id, "name": artist.name, "email": artist.email} for artist in favorite_artists]
         return Response(data, status=status.HTTP_200_OK)
+    
+
+class NameDuplicateCheckView(APIView):
+    """유저 이름 중복 확인"""
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        name = request.data.get("name")
+        if not name:
+            return Response({"success": False, "message": "이름을 입력해주세요."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if User.objects.filter(name=name).exists():
+            return Response({"success": False, "message": "이미 존재하는 이름입니다."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        return Response({"success": True, "message": "사용 가능한 이름입니다."}, status=status.HTTP_200_OK)
