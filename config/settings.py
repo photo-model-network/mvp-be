@@ -240,7 +240,7 @@ PORTONE_WEBHOOK = config("PORTONE_WEBHOOK", cast=str)
 APICK_SECRET = config("APICK_SECRET", cast=str)
 
 NTS_SECRET = config("NTS_SECRET", cast=str)
-
+ELASTIC_URL = config("ELASTIC_URL", cast=str)
 
 AWS_S3_REGION_NAME = "auto"
 CLOUDFLARE_R2_BUCKET_NAME = config("CLOUDFLARE_R2_BUCKET_NAME", cast=str)
@@ -320,3 +320,7 @@ LOGGING = {
         },
     },
 }
+
+from elasticsearch import Elasticsearch
+
+es = Elasticsearch([ELASTIC_URL])
