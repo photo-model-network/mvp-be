@@ -15,6 +15,7 @@ from .serializers import GoogleSerializer, KakaoSerializer, NaverSerializer
 from .serializers import BusinessVerificationSerializer
 from .serializers import LoginSerializer, RegisterSerializer, ChangePasswordSerializer
 from .models import User
+from reservations.models import Reservation
 
 import logging
 
@@ -70,8 +71,25 @@ class DeleteAccountView(APIView):
 
     def delete(self, request):
         user = request.user
+
+        # 대기중, 예약확정, 작업중 상태의 예약이 있는지 확인
+        has_pending_reservations = Reservation.objects.filter(
+            customer=user,
+            status__in=[
+                Reservation.ReservationStatus.PENDING,
+                Reservation.ReservationStatus.CONFIRMED,
+                Reservation.ReservationStatus.OPERATING,
+            ]
+        ).exists()
+
+        if has_pending_reservations:
+            return Response(
+                {"message": "대기중, 예약확정 또는 작업중인 예약이 있어 탈퇴할 수 없습니다."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # 예약 상태에 문제가 없다면 탈퇴 진행
         user.delete()
-        logout(request)
         return Response(
             {"message": "회원 탈퇴가 완료되었습니다."}, status=status.HTTP_200_OK
         )

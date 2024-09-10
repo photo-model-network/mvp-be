@@ -121,7 +121,7 @@ class Package(CommonModel):
         max_length=20, choices=CategoryChoices.choices, default=CategoryChoices.PROFILE
     )
     # 패키지 제공자
-    provider = models.ForeignKey(User, on_delete=models.CASCADE)
+    provider = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     # 패키지 제공자 정보 (SNS, 문의 이메일 등)
     provider_info = models.ForeignKey(PackageProvider, on_delete=models.CASCADE)
     # 패키지 제목

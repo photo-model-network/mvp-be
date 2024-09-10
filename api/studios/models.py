@@ -28,7 +28,7 @@ class Studio(CommonModel):
 
     id = ShortUUIDField(primary_key=True, editable=False)
     # 관리자
-    owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     # 스튜디오 이름
     name = models.CharField(max_length=100)
     # 스튜디오 지역

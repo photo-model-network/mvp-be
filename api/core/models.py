@@ -4,7 +4,7 @@ from api.packages.models import Package
 
 
 class Interaction(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     package = models.ForeignKey(Package, on_delete=models.CASCADE)
     interaction_type = models.CharField(
         max_length=50

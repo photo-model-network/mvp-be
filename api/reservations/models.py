@@ -21,7 +21,7 @@ class Reservation(AbstractPayment):
         Package, on_delete=models.CASCADE, related_name="reservations"
     )
     customer = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="reservations"
+        User, on_delete=models.SET_NULL, related_name="reservations", null=True
     )
     status = models.CharField(
         max_length=15,
