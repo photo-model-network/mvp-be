@@ -12,8 +12,7 @@ class PackagePicture(CommonModel):
     """촬영 패키지 소개 이미지 (여러장)"""
 
     package = models.ForeignKey("Package", on_delete=models.CASCADE)
-    original_url = models.ImageField()
-    store_url = models.ImageField()
+    image = models.ImageField(blank=True, null=True)
 
     class Meta:
         verbose_name = "패키지 소개 이미지"
@@ -122,14 +121,13 @@ class Package(CommonModel):
         max_length=20, choices=CategoryChoices.choices, default=CategoryChoices.PROFILE
     )
     # 패키지 제공자
-    provider = models.ForeignKey(User, on_delete=models.CASCADE)
+    provider = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     # 패키지 제공자 정보 (SNS, 문의 이메일 등)
     provider_info = models.ForeignKey(PackageProvider, on_delete=models.CASCADE)
     # 패키지 제목
     title = models.CharField(max_length=255)
     # 대표 이미지
-    thumbnail = models.ImageField()
-    thumbnail_store_url = models.ImageField(blank=True, null=True)
+    thumbnail = models.ImageField(blank=True, null=True)
     # 패키지 요약 (카드로 표시될 경우 간단히 보이는 글)
     summary = models.TextField()
     # 패키지 내용 (에디터로 작성한 글과 이미지)

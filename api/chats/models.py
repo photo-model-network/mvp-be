@@ -7,10 +7,12 @@ from channels.layers import get_channel_layer
 from api.common.models import CommonModel
 from api.accounts.models import User
 
-def upload_to_uuid(instance, filename):
+
+def save_message_file(instance, filename):
     ext = filename.split(".")[-1]
     new_filename = f"{uuid.uuid4()}.{ext}"
-    return os.path.join(new_filename)
+    return os.path.join(f"chats/{instance.room.id}", new_filename)
+
 
 class ChatRoom(CommonModel):
     id = ShortUUIDField(primary_key=True, editable=False)
@@ -31,9 +33,9 @@ class Message(models.Model):
     room = models.ForeignKey(
         ChatRoom, on_delete=models.CASCADE, related_name="messages"
     )
-    sender = models.ForeignKey(User, on_delete=models.CASCADE)
+    sender = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     message = models.TextField(blank=True)
-    file = models.FileField(upload_to=upload_to_uuid, null=True, blank=True)
+    file = models.FileField(upload_to=save_message_file, null=True, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
 

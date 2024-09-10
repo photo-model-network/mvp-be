@@ -9,7 +9,7 @@ class Review(CommonModel):
     """리뷰 (촬영 패키지 후기)"""
 
     package = models.ForeignKey(Package, on_delete=models.CASCADE)
-    customer = models.ForeignKey(User, on_delete=models.CASCADE)
+    customer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     comment = models.TextField()
     rating = models.DecimalField(
         max_digits=3,  # 최대 자릿수 (정수부 + 소수부)
