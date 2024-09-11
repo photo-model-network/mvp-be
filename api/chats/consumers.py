@@ -103,4 +103,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def save_message(self, sender, room, message, file_url):
-        return Message.objects.create(sender=sender, room=room, message=message, file=file_url)
+        return Message.objects.create(
+            sender=sender, room=room, message=message, file=file_url
+        )
