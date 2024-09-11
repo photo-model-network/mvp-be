@@ -13,9 +13,9 @@ from drf_yasg.utils import swagger_auto_schema
 from .throttles import SendBankVerificationThrottle
 from .serializers import GoogleSerializer, KakaoSerializer, NaverSerializer
 from .serializers import BusinessVerificationSerializer
-from .serializers import LoginSerializer, RegisterSerializer, ChangePasswordSerializer
+from .serializers import LoginSerializer, RegisterSerializer, ChangePasswordSerializer, CheckNameDuplicationSerializer
 from .models import User
-from reservations.models import Reservation
+from api.reservations.models import Reservation
 
 import logging
 
@@ -581,16 +581,12 @@ class ListFavoriteArtistsView(APIView):
         return Response(data, status=status.HTTP_200_OK)
     
 
-class NameDuplicateCheckView(APIView):
+class CheckNameDuplicationView(APIView):
     """유저 이름 중복 확인"""
     permission_classes = [AllowAny]
 
     def post(self, request):
-        name = request.data.get("name")
-        if not name:
-            return Response({"success": False, "message": "이름을 입력해주세요."}, status=status.HTTP_400_BAD_REQUEST)
-        
-        if User.objects.filter(name=name).exists():
-            return Response({"success": False, "message": "이미 존재하는 이름입니다."}, status=status.HTTP_400_BAD_REQUEST)
-        
-        return Response({"success": True, "message": "사용 가능한 이름입니다."}, status=status.HTTP_200_OK)
+        serializer = CheckNameDuplicationSerializer(data=request.data)
+        if serializer.is_valid():
+            return Response({"success": True, "message": "사용 가능한 닉네임입니다."}, status=status.HTTP_200_OK)
+        return Response({"success": False, "message": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)

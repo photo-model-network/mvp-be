@@ -33,7 +33,7 @@ class Migration(migrations.Migration):
                 ('date_joined', models.DateTimeField(default=django.utils.timezone.now, verbose_name='date joined')),
                 ('id', shortuuid.django_fields.ShortUUIDField(alphabet=None, editable=False, length=22, max_length=22, prefix='', primary_key=True, serialize=False)),
                 ('name', models.CharField(default='익명의 사용자', max_length=100)),
-                ('avatar', models.ImageField(blank=True, upload_to=api.accounts.models.save_user_avatar)),
+                ('avatar', models.ImageField(blank=True, )),
                 ('bio', models.TextField(blank=True, default='안녕하세요, 저의 프로필에 방문해주셔서 감사합니다.')),
                 ('type', models.CharField(choices=[('개인', '개인'), ('개인사업자', '개인사업자'), ('법인사업자', '법인사업자')], default=None, max_length=10, null=True)),
                 ('is_approved', models.BooleanField(default=False)),

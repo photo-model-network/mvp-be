@@ -12,7 +12,7 @@ from .views import (
     IdentityVerificationView,
 )
 from .views import RegisterView, LoginView, DeleteAccountView, ChangePasswordView
-from .views import FavoriteArtistManageView, ListFavoriteArtistsView, NameDuplicateCheckView
+from .views import FavoriteArtistManageView, ListFavoriteArtistsView, CheckNameDuplicationView
 
 urlpatterns = (
     [
@@ -73,6 +73,6 @@ urlpatterns = (
         path('accounts/login/', LoginView.as_view(), name='login'),
         path('accounts/delete-account/', DeleteAccountView.as_view(), name='delete_account'),
         path('accounts/change-password/', ChangePasswordView.as_view(), name='change_password'),
-        path('accounts/name-duplicheck/', NameDuplicateCheckView.as_view(), name='name_duplicate_check'),    
+        path('accounts/check-name-duplication/', CheckNameDuplicationView.as_view(), name='name_duplicate_check'),    
     ]
 )
