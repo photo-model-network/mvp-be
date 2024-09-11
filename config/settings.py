@@ -199,24 +199,7 @@ KST = timezone(TIME_ZONE)
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-import os
-
 STATIC_URL = "/static/"
-# STATICFILES_DIRS = [
-#     os.path.join(BASE_DIR, "static"),
-# ]
-# STATIC_ROOT = BASE_DIR / "staticfiles"
-
-# if not DEBUG:
-#     STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
-
-# MEDIA_URL = "/uploads/"
-# MEDIA_ROOT = os.path.join(BASE_DIR, "uploads")
-
-
-# DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
-# STATICFILES_STORAGE = "django.core.files.storage.FileSystemStorage"
-
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
@@ -240,7 +223,6 @@ PORTONE_WEBHOOK = config("PORTONE_WEBHOOK", cast=str)
 APICK_SECRET = config("APICK_SECRET", cast=str)
 
 NTS_SECRET = config("NTS_SECRET", cast=str)
-
 
 AWS_S3_REGION_NAME = "auto"
 CLOUDFLARE_R2_BUCKET_NAME = config("CLOUDFLARE_R2_BUCKET_NAME", cast=str)
