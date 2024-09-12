@@ -16,8 +16,6 @@
   <a href="#database-erd">Database ERD</a> • <a href="#credits">Credits</a> • <a href="#related">Related</a> • <a href="#support">Support</a> • <a href="#license">License</a>
 </p>
 
-<img width="1260" alt="photo-model-network-railway" src="https://github.com/user-attachments/assets/6a5e5e40-0053-414a-9a1a-0bf09779a3ba">
-
 ## Database ERD
 
 To view the **`Database ERD`**, please click [here](https://www.erdcloud.com/d/99XnFmJdd7o54PdJu).
