@@ -583,10 +583,10 @@ class ListFavoriteArtistsView(APIView):
 
 class CheckNameDuplicationView(APIView):
     """유저 이름 중복 확인"""
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def post(self, request):
         serializer = CheckNameDuplicationSerializer(data=request.data)
         if serializer.is_valid():
-            return Response({"success": True, "message": "사용 가능한 닉네임입니다."}, status=status.HTTP_200_OK)
-        return Response({"success": False, "message": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": "사용 가능한 닉네임입니다."}, status=status.HTTP_200_OK)
+        return Response({"message": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)

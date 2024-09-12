@@ -6,7 +6,6 @@ from django.contrib.auth.models import AbstractUser
 from shortuuid.django_fields import ShortUUIDField
 
 
-
 def save_user_avatar(instance, filename):
     ext = filename.split(".")[-1]
     new_filename = f"{shortuuid.uuid()}.{ext}"
