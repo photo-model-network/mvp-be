@@ -1,6 +1,4 @@
-import re
-import json
-import requests
+import re, json, requests
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import get_object_or_404
@@ -10,12 +8,18 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from drf_yasg.utils import swagger_auto_schema
+from api.reservations.models import Reservation
 from .throttles import SendBankVerificationThrottle
 from .serializers import GoogleSerializer, KakaoSerializer, NaverSerializer
 from .serializers import BusinessVerificationSerializer
-from .serializers import LoginSerializer, RegisterSerializer, ChangePasswordSerializer, CheckNameDuplicationSerializer
+from .serializers import (
+    LoginSerializer,
+    RegisterSerializer,
+    ChangePasswordSerializer,
+    CheckNameDuplicationSerializer,
+)
 from .models import User
-from api.reservations.models import Reservation
+
 
 import logging
 
@@ -551,20 +555,21 @@ class FavoriteArtistManageView(APIView):
 
         if artist == user:
             return Response(
-                {"detail": "자신을 관심 아티스트로 등록할 수 없습니다."},
+                {"message": "자신을 관심 아티스트로 등록할 수 없습니다."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         if artist in user.favorite_artists.all():
             user.favorite_artists.remove(artist)
             return Response(
-                {"detail": "관심 아티스트에서 해제되었습니다."},
+                {"message": "관심 아티스트에서 해제되었습니다."},
                 status=status.HTTP_200_OK,
             )
         else:
             user.favorite_artists.add(artist)
             return Response(
-                {"detail": "관심 아티스트로 등록되었습니다."}, status=status.HTTP_200_OK
+                {"message": "관심 아티스트로 등록되었습니다."},
+                status=status.HTTP_200_OK,
             )
 
 
@@ -581,14 +586,19 @@ class ListFavoriteArtistsView(APIView):
             for artist in favorite_artists
         ]
         return Response(data, status=status.HTTP_200_OK)
-    
+
 
 class CheckNameDuplicationView(APIView):
     """유저 이름 중복 확인"""
+
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
         serializer = CheckNameDuplicationSerializer(data=request.data)
         if serializer.is_valid():
-            return Response({"message": "사용 가능한 닉네임입니다."}, status=status.HTTP_200_OK)
-        return Response({"message": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"message": "사용 가능한 닉네임입니다."}, status=status.HTTP_200_OK
+            )
+        return Response(
+            {"message": serializer.errors}, status=status.HTTP_400_BAD_REQUEST
+        )
