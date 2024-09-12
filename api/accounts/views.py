@@ -13,7 +13,7 @@ from drf_yasg.utils import swagger_auto_schema
 from .throttles import SendBankVerificationThrottle
 from .serializers import GoogleSerializer, KakaoSerializer, NaverSerializer
 from .serializers import BusinessVerificationSerializer
-from .serializers import LoginSerializer, RegisterSerializer, ChangePasswordSerializer
+from .serializers import LoginSerializer, RegisterSerializer, ChangePasswordSerializer, CheckNameDuplicationSerializer
 from .models import User
 from api.reservations.models import Reservation
 
@@ -581,3 +581,14 @@ class ListFavoriteArtistsView(APIView):
             for artist in favorite_artists
         ]
         return Response(data, status=status.HTTP_200_OK)
+    
+
+class CheckNameDuplicationView(APIView):
+    """유저 이름 중복 확인"""
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = CheckNameDuplicationSerializer(data=request.data)
+        if serializer.is_valid():
+            return Response({"message": "사용 가능한 닉네임입니다."}, status=status.HTTP_200_OK)
+        return Response({"message": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)

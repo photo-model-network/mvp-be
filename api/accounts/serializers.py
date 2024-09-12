@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator, EmailValidator
 from .models import User
 
@@ -87,3 +88,22 @@ class BusinessVerificationSerializer(serializers.Serializer):
             )
         ]
     )
+
+
+class CheckNameDuplicationSerializer(serializers.Serializer):
+    name = serializers.CharField(
+        required=True,
+        min_length=3,
+        max_length=30,
+        validators=[
+            RegexValidator(
+                regex=r'^[a-zA-Z0-9가-힣]+$',
+                message="닉네임은 알파벳, 숫자, 한글만 포함할 수 있습니다."
+            )
+        ]
+    )
+
+    def validate_name(self, value):
+        if User.objects.filter(name=value).exists():
+            raise ValidationError("이미 존재하는 닉네임입니다.")
+        return value

@@ -1,4 +1,4 @@
-import os, shortuuid
+import os, uuid, shortuuid
 import requests
 from django.db import models
 from django.core.files.base import ContentFile
@@ -20,7 +20,7 @@ class User(AbstractUser):
         CORPORATE = ("법인사업자", "법인사업자")
 
     id = ShortUUIDField(primary_key=True, editable=False)
-    name = models.CharField(max_length=100, default="익명의 사용자")
+    name = models.CharField(max_length=100, unique=True)
     avatar = models.ImageField(upload_to=save_user_avatar, blank=True)
     # 한줄 소개
     bio = models.TextField(
@@ -74,6 +74,20 @@ class User(AbstractUser):
                 self.avatar.save(
                     "default_avatar.png", ContentFile(response.content), save=False
                 )
+        # 유니크한 이름 생성
+        if not self.name:
+            if '@' in self.username:
+                local_part, domain_part = self.username.split('@')
+                domain_part = domain_part.split('.')[0]
+                base_name = f"{local_part}-{domain_part}"
+            else:
+                base_name = "익명의 사용자"
+            
+            unique_name = base_name
+            while User.objects.filter(name=unique_name).exists():
+                unique_name = f"{base_name}_{uuid.uuid4().hex[:8]}"
+            self.name = unique_name
+        
         super().save(*args, **kwargs)
 
     def __str__(self):
