@@ -1,3 +1,7 @@
+"""
+Elasticsearch 설정
+"""
+
 from elasticsearch import Elasticsearch
 from decouple import config
 

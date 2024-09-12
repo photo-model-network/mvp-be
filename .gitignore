@@ -7,7 +7,7 @@ dump.rdb
 # docker-compose.yml
 # .dockerignore
 # runtime.txt
-
+settings1.py
 
 ### Django ###
 *.log
