@@ -73,6 +73,6 @@ urlpatterns = (
         path('accounts/login/', LoginView.as_view(), name='login'),
         path('accounts/delete-account/', DeleteAccountView.as_view(), name='delete_account'),
         path('accounts/change-password/', ChangePasswordView.as_view(), name='change_password'),
-        path('accounts/check-name-duplication/', CheckNameDuplicationView.as_view(), name='name_duplicate_check'),    
+        path('accounts/check-name-duplication/', CheckNameDuplicationView.as_view(), name='check_name_duplication'),    
     ]
 )
