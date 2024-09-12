@@ -1,6 +1,6 @@
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
-from config.elasticsearch import es
+from config.settings.elasticsearch import es
 from .models import Package
 
 
