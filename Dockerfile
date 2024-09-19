@@ -6,6 +6,7 @@ ENV PYTHONBUFFERED=1
 WORKDIR /app
 
 COPY requirements.txt .
+COPY entrypoint.sh .
 
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
