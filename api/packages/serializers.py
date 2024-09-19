@@ -4,28 +4,7 @@ from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer, ListField, URLField, ImageField
 from taggit.serializers import TagListSerializerField
 from api.packages.models import Package, PackagePicture
-
-
-def save_images(images, package):
-    image_objects = []
-    for image in images:
-        ext = os.path.splitext(image.name)[1]
-        new_filename = os.path.join(
-            f"packages/{package.id}/images", f"{uuid.uuid4()}{ext}"
-        )
-        default_storage.save(new_filename, image)
-        image_objects.append(PackagePicture(package=package, image=new_filename))
-    PackagePicture.objects.bulk_create(image_objects)
-
-
-def save_thumbnail(thumbnail, package):
-    ext = os.path.splitext(thumbnail.name)[1]
-    new_filename = os.path.join(
-        f"packages/{package.id}/thumbnail", f"{uuid.uuid4()}{ext}"
-    )
-    default_storage.save(new_filename, thumbnail)
-    package.thumbnail = new_filename
-    package.save()
+from api.core.utils import save_images, save_thumbnail
 
 
 class PackageCUDSerializer(ModelSerializer):
