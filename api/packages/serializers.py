@@ -4,7 +4,7 @@ from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer, ListField, URLField, ImageField
 from taggit.serializers import TagListSerializerField
 from api.packages.models import Package, PackagePicture
-from api.core.utils import save_images, save_thumbnail
+from api.core.utils import save_package_images, save_thumbnail
 
 
 class PackageCUDSerializer(ModelSerializer):
@@ -46,7 +46,7 @@ class PackageCUDSerializer(ModelSerializer):
 
         # 이미지 저장 처리 (필요하다면 별도의 함수로 처리)
         if images:
-            save_images(images, package)
+            save_package_images(images, package)
 
         return package
 

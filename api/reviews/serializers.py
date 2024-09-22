@@ -1,6 +1,6 @@
 from api.reviews.models import Review
 from rest_framework.serializers import ModelSerializer
-from api.core.utils import save_images
+from api.core.utils import save_review_images
 
 class ReviewCRUDSerializer(ModelSerializer):
 
@@ -13,5 +13,5 @@ class ReviewCRUDSerializer(ModelSerializer):
         images = validated_data.pop('images', None)
         review = super().create(validated_data)
         if images:
-            save_images(images, review)
+            save_review_images(images, review)
         return review
