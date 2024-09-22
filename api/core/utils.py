@@ -28,10 +28,11 @@ def save_thumbnail(thumbnail, package):
 def save_review_images(images, review):
     """reviews/{id}/images/uuid.ext 경로로 이미지 저장"""
     image_objects = []
+    package = review.package
     for image in images:
         ext = os.path.splitext(image.name)[1]
         new_filename = os.path.join(
-            f"reviews/{review.id}/images", f"{uuid.uuid4()}{ext}"
+            f"packages/{package.id}/reviews/{review.id}/images", f"{uuid.uuid4()}{ext}"
         )
         default_storage.save(new_filename, image)
         image_objects.append(ReviewPicture(review=review, image=new_filename))
