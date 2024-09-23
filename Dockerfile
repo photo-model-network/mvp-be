@@ -5,8 +5,7 @@ ENV PYTHONBUFFERED=1
 
 WORKDIR /app
 
-COPY requirements.txt .
-COPY entrypoint.sh .
+COPY requirements.txt entrypoint.sh ./
 
 RUN pip install \
     --no-cache-dir \
