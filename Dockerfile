@@ -5,11 +5,12 @@ ENV PYTHONBUFFERED=1
 
 WORKDIR /app
 
-COPY requirements.txt .
-COPY entrypoint.sh /app/entrypoint.sh
+COPY requirements.txt entrypoint.sh ./
 
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
+RUN pip install \
+    --no-cache-dir \
+    --upgrade \
+    -r requirements.txt
 
 COPY . .
 

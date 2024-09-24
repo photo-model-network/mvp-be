@@ -26,3 +26,13 @@ class Review(CommonModel):
         verbose_name_plural = "리뷰 (촬영 패키지 후기)"
 
         ordering = ["-created_at"]
+
+class ReviewPicture(CommonModel):
+    """리뷰 이미지"""
+
+    review = models.ForeignKey(Review, on_delete=models.CASCADE)
+    image = models.ImageField(blank=True, null=True)
+
+    class Meta:
+        verbose_name = "리뷰 이미지"
+        verbose_name_plural = "리뷰 이미지"
